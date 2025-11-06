@@ -1,7 +1,10 @@
+import org.asciidoctor.gradle.jvm.AsciidoctorTask
+
 plugins {
     java
     id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.7"
+    id("org.asciidoctor.jvm.convert") version "3.3.2"
 }
 
 group = "learn"
@@ -20,18 +23,54 @@ configurations {
     }
 }
 
+val asciidoctorExt: Configuration by configurations.creating {
+    extendsFrom(configurations["testImplementation"])
+}
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    /*
+    * Spring
+    * */
+    // boot
     implementation("org.springframework.boot:spring-boot-starter-web")
+
+    /*
+    * Utils
+    * */
+    // LOMBOK
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
+    // RESTDOCS
+    asciidoctorExt("org.springframework.restdocs:spring-restdocs-asciidoctor")
+
+    /*
+    * Tests
+    * */
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
 }
 
-tasks.withType<Test> {
+val snippetsDir = file("build/generated-snippets")
+
+tasks.test {
     useJUnitPlatform()
+    outputs.dir(snippetsDir)
+}
+
+tasks.named<AsciidoctorTask>("asciidoctor") {
+    dependsOn(tasks.named("test"))
+    inputs.dir(snippetsDir)
+    configurations("asciidoctorExt")
+}
+
+tasks.bootJar {
+    dependsOn(tasks.named("asciidoctor"))
+    from(tasks.named<AsciidoctorTask>("asciidoctor").get().outputDir) {
+        into("static/docs")
+    }
 }
