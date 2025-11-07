@@ -70,7 +70,14 @@ tasks.named<AsciidoctorTask>("asciidoctor") {
 
 tasks.bootJar {
     dependsOn(tasks.named("asciidoctor"))
-    from(tasks.named<AsciidoctorTask>("asciidoctor").get().outputDir) {
-        into("static/docs")
-    }
+}
+
+tasks.register<Copy>("copyRestDocs") {
+    dependsOn(tasks.named("asciidoctor"))
+
+    val copyDocsDir = layout.buildDirectory.dir("resources/main/static/docs").get().asFile
+
+    delete(copyDocsDir)
+    from(tasks.named<AsciidoctorTask>("asciidoctor").get().outputDir)
+    into(copyDocsDir)
 }

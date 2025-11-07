@@ -6,9 +6,19 @@
 ## 1. ATDD를 위한 REST DOCS 적용
 
 * RestDocs 공식 문서 - [링크](https://docs.spring.io/spring-restdocs/docs/current/reference/htmlsingle/#getting-started-using-the-snippets)
+* index.doc, testController, testCode 필수
 
 ### 1-1. Gradle Migration
 
 * Kotlin DSL에서는 Groovy와 문법이 다름
 * 해당 사이트 참고 - [링크](https://docs.gradle.org/8.5/userguide/migrating_from_groovy_to_kotlin_dsl.html)
-  * 본 프로젝트는 gradle 8.5 버전
+  * 본 프로젝트는 gradle 8.5 버전으로 마이그레이션 완료
+
+### 1-2. Custom Task 추가
+
+* Local에서 작업 시 IDE 편의성을 위한 TASK
+
+### 1-3. Production 보안 설정
+
+* Security 등 추가해서 보안 설정 가능
+  * 이미 할 줄 아는거라서 포함 X
