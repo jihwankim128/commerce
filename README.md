@@ -22,3 +22,22 @@
 
 * Security 등 추가해서 보안 설정 가능
   * 이미 할 줄 아는거라서 포함 X
+
+## 2. Web Common Module Separation
+
+### 2-1. 전역 예외 처리
+
+* gradle bean validation 추가
+* bean validation에서 발생하는 예외 처리 관심사 분리
+* 비즈니스에서 발생하는 예외 관심사 분리
+  * 학습 용도이므로 IllegalArgument로 통일
+* 그 외 예외 관심사 분리 (서버 에러)
+
+### 2-2. 전역 응답 처리
+
+* 공통 응답 템플릿을 활용하는 경우, 반복되는 형태
+  * controller -> `return ApiTemplate.of(data);`
+  * 반복되는 형태를 `ResponseBodyAdvice`로 공통 Wrapping 처리하며 관심사 분리
+* Converter 등록 순서로 인해 String Wrapping 실패
+  * `org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport#addDefaultHttpMessageConverters`
+  * String 전용 Wrapper 도입으로 Wrapping
