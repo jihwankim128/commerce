@@ -11,4 +11,9 @@ public class Controller {
     public Map<String, String> sample() {
         return Map.of("message", "Test");
     }
+
+    @GetMapping("/api/test")
+    public int test() {
+        return 1;
+    }
 }
