@@ -41,3 +41,7 @@
 * Converter 등록 순서로 인해 String Wrapping 실패
   * `org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport#addDefaultHttpMessageConverters`
   * String 전용 Wrapper 도입으로 Wrapping
+
+## 3. 커머스 ATDD 진행
+
+관련 문서 - [링크](docs/FEATURE.md)
