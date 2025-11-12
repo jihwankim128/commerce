@@ -29,7 +29,7 @@ class OrderItemTest {
     @Test
     void 상품정보_가격정보_수량정보로_주문_상품을_생성한다() {
         // when
-        OrderItem orderItem = new OrderItem(VALID_PRODUCT, VALID_PRICE, VALID_QUANTITY);
+        OrderItem orderItem = OrderItem.of(VALID_PRODUCT, VALID_PRICE, VALID_QUANTITY);
 
         // then
         assertThat(orderItem.product()).isEqualTo(VALID_PRODUCT);
@@ -41,7 +41,7 @@ class OrderItemTest {
     @MethodSource("provideInvalidProductAndPrice")
     void 상품정보와_가격정보는_필수이다(Product invalidProduct, Money invalidPrice) {
         // when & then
-        assertThatThrownBy(() -> new OrderItem(invalidProduct, invalidPrice, VALID_QUANTITY))
+        assertThatThrownBy(() -> OrderItem.of(invalidProduct, invalidPrice, VALID_QUANTITY))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -49,19 +49,16 @@ class OrderItemTest {
     @ValueSource(ints = {-1, 0})
     void 수량정보는_1개_이상이어야한다(int invalidQuantity) {
         // when & then
-        assertThatThrownBy(() -> new OrderItem(VALID_PRODUCT, VALID_PRICE, invalidQuantity))
+        assertThatThrownBy(() -> OrderItem.of(VALID_PRODUCT, VALID_PRICE, invalidQuantity))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void 주문_상품의_총_가격을_알_수_있다() {
-        // given
-        OrderItem orderItem = new OrderItem(VALID_PRODUCT, VALID_PRICE, VALID_QUANTITY);
-
         // when
-        Money amount = orderItem.calculateTotalAmount();
+        OrderItem orderItem = OrderItem.of(VALID_PRODUCT, VALID_PRICE, VALID_QUANTITY);
 
         // then
-        assertThat(amount.amount()).isEqualTo(10000);
+        assertThat(orderItem.totalAmount().amount()).isEqualTo(10000);
     }
 }

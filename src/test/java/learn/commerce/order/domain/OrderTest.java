@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import learn.commerce.order.domain.vo.Money;
 import learn.commerce.order.domain.vo.OrderId;
 import learn.commerce.order.domain.vo.OrderItem;
+import learn.commerce.order.domain.vo.OrderItems;
 import learn.commerce.order.domain.vo.OrderStatus;
 import learn.commerce.order.domain.vo.Orderer;
 import learn.commerce.order.domain.vo.Product;
@@ -21,8 +22,8 @@ class OrderTest {
 
     private static final OrderId validOrderId = OrderId.generate();
     private static final Orderer validOrderer = new Orderer("김지환", "01012345678");
-    private static final List<OrderItem> validOrderItems =
-            List.of(new OrderItem(new Product(UUID.randomUUID(), "상품"), new Money(1000), 5));
+    private static final OrderItems validOrderItems =
+            new OrderItems(List.of(OrderItem.of(new Product(UUID.randomUUID(), "상품"), new Money(1000), 5)));
 
     public static Stream<Arguments> invalidOrders() {
         return Stream.of(
@@ -34,7 +35,7 @@ class OrderTest {
 
     @ParameterizedTest
     @MethodSource("invalidOrders")
-    void 주문_정보는_필수정보이다(OrderId orderId, Orderer orderer, List<OrderItem> items) {
+    void 주문_정보는_필수정보이다(OrderId orderId, Orderer orderer, OrderItems items) {
         // when & then
         assertThatThrownBy(() -> Order.createOf(orderId, orderer, items))
                 .isInstanceOf(IllegalArgumentException.class);

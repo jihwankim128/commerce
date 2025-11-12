@@ -12,4 +12,9 @@ public record OrderId(UUID value) {
     public static OrderId generate() {
         return new OrderId(UUID.randomUUID());
     }
+
+    @Override
+    public String toString() {
+        return value.toString();
+    }
 }

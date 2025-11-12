@@ -28,7 +28,11 @@ public class Order {
         this.status = OrderStatus.ORDER_COMPLETED;
     }
 
-    public static Order createOf(OrderId orderId, Orderer orderer, List<OrderItem> items) {
-        return new Order(orderId, orderer, new OrderItems(items));
+    public static Order createOf(OrderId orderId, Orderer orderer, OrderItems items) {
+        return new Order(orderId, orderer, items);
+    }
+
+    public List<OrderItem> getItems() {
+        return items.items();
     }
 }
