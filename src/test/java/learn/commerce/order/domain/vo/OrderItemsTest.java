@@ -13,8 +13,8 @@ class OrderItemsTest {
 
     private static List<OrderItem> createOrderItems() {
         return List.of(
-                new OrderItem(new Product(UUID.randomUUID(), "상품1"), new Money(10000), 2),
-                new OrderItem(new Product(UUID.randomUUID(), "상품2"), Money.ZERO, 3)
+                OrderItem.of(new Product(UUID.randomUUID(), "상품1"), new Money(10000), 2),
+                OrderItem.of(new Product(UUID.randomUUID(), "상품2"), Money.ZERO, 3)
         );
     }
 

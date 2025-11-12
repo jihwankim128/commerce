@@ -11,7 +11,7 @@ public record OrderItems(List<OrderItem> items) {
 
     public Money calculateTotalAmount() {
         return items.stream()
-                .map(OrderItem::calculateTotalAmount)
+                .map(OrderItem::totalAmount)
                 .reduce(Money.ZERO, Money::add);
     }
 }
