@@ -1,5 +1,6 @@
 package learn.acceptance.template;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -30,6 +31,15 @@ public class OrderRequestTemplate extends BaseRequestTemplate {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(주문요청))
                 )
+                .andDo(print())
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
+                .andReturn();
+
+        return extractBody(result, OrderResponse.class);
+    }
+
+    public OrderResponse getOrder(String orderId) throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/orders/{orderId}", orderId))
                 .andDo(print())
                 .andExpect(jsonPath("$.status").value("SUCCESS"))
                 .andReturn();
