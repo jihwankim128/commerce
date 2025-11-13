@@ -1,7 +1,7 @@
 package learn.commerce.order.domain;
 
 import java.util.List;
-import learn.commerce.order.domain.vo.Money;
+import learn.commerce.common.domain.Money;
 import learn.commerce.order.domain.vo.OrderId;
 import learn.commerce.order.domain.vo.OrderItem;
 import learn.commerce.order.domain.vo.OrderItems;

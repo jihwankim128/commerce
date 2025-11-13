@@ -1,6 +1,6 @@
 package learn.commerce.order.application.port.in.command;
 
-import learn.commerce.order.domain.vo.Money;
+import learn.commerce.common.domain.Money;
 import learn.commerce.order.domain.vo.OrderItem;
 import learn.commerce.order.domain.vo.Product;
 

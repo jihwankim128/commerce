@@ -1,6 +1,7 @@
 package learn.commerce.order.domain.vo;
 
 import java.util.List;
+import learn.commerce.common.domain.Money;
 
 public record OrderItems(List<OrderItem> items) {
     public OrderItems {

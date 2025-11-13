@@ -1,4 +1,4 @@
-package learn.commerce.order.domain.vo;
+package learn.commerce.common.domain;
 
 public record Money(int amount) {
     public static Money ZERO = new Money(0);

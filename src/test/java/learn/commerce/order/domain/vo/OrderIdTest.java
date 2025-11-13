@@ -1,9 +1,8 @@
-package learn.commerce.order.domain;
+package learn.commerce.order.domain.vo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import learn.commerce.order.domain.vo.OrderId;
 import org.junit.jupiter.api.Test;
 
 class OrderIdTest {

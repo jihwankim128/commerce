@@ -1,11 +1,10 @@
-package learn.commerce.order.domain;
+package learn.commerce.order.domain.vo;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.UUID;
 import java.util.stream.Stream;
-import learn.commerce.order.domain.vo.Product;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
