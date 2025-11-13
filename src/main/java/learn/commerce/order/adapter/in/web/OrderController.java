@@ -1,7 +1,7 @@
 package learn.commerce.order.adapter.in.web;
 
 import learn.commerce.order.adapter.in.web.request.PurchaseOrderRequest;
-import learn.commerce.order.adapter.in.web.response.PurchaseOrderResponse;
+import learn.commerce.order.adapter.in.web.response.OrderResponse;
 import learn.commerce.order.application.port.in.CreateOrderUseCase;
 import learn.commerce.order.application.port.in.command.PurchaseOrder;
 import learn.commerce.order.application.port.in.result.PurchaseResult;
@@ -19,9 +19,9 @@ public class OrderController {
     private final CreateOrderUseCase createOrderUseCase;
 
     @PostMapping
-    public PurchaseOrderResponse createOrder(@RequestBody PurchaseOrderRequest request) {
+    public OrderResponse createOrder(@RequestBody PurchaseOrderRequest request) {
         PurchaseOrder command = request.toCommand();
         PurchaseResult result = createOrderUseCase.createOrder(command);
-        return PurchaseOrderResponse.from(result);
+        return OrderResponse.from(result);
     }
 }

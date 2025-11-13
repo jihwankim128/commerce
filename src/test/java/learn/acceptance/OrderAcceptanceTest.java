@@ -1,75 +1,45 @@
 package learn.acceptance;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import learn.commerce.CommerceApplication;
+import learn.acceptance.template.BaseAcceptanceTemplate;
+import learn.acceptance.template.OrderRequestTemplate;
+import learn.commerce.order.adapter.in.web.request.PurchaseOrderItemRequest;
+import learn.commerce.order.adapter.in.web.request.PurchaseOrderRequest;
+import learn.commerce.order.adapter.in.web.response.OrderResponse;
+import learn.commerce.order.domain.Order;
+import learn.commerce.order.domain.OrderRepository;
+import learn.commerce.order.domain.vo.OrderId;
+import learn.commerce.order.domain.vo.OrderStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(classes = CommerceApplication.class)
-@AutoConfigureMockMvc
-class OrderAcceptanceTest {
+
+class OrderAcceptanceTest extends BaseAcceptanceTemplate {
 
     @Autowired
-    private MockMvc mockMvc;
+    private OrderRequestTemplate requestTemplate;
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    private static Map<String, Object> getOrderRequest(String 구매자_이름, String 구매자_번호) {
-        return Map.of(
-                "ordererName", 구매자_이름,
-                "ordererPhoneNumber", 구매자_번호,
-                "items", getOrderItems()
-        );
-    }
-
-    private static List<Map<String, ? extends Serializable>> getOrderItems() {
-        return List.of(
-                getOrderItem("우아한 티셔츠", 15000, 2),
-                getOrderItem("토스 후드티", 35000, 1)
-        );
-    }
-
-    private static Map<String, ? extends Serializable> getOrderItem(String 아이템명, int 가격, int 수량) {
-        return Map.of(
-                "productId", UUID.randomUUID().toString(),
-                "productName", 아이템명,
-                "price", 가격,
-                "quantity", 수량
-        );
-    }
+    private OrderRepository orderRepository;
 
     @Test
     void 사용자는_상품을_선택하여_주문을_생성한다() throws Exception {
         // given
-        Map<String, Object> 주문요청 = getOrderRequest("김지환", "01012345678");
+        List<PurchaseOrderItemRequest> 주문_아이템 = List.of(
+                requestTemplate.createPurchaseItemRequest("우아한 티셔츠", 15000, 2),
+                requestTemplate.createPurchaseItemRequest("토스 후드티", 35000, 1)
+        );
+        PurchaseOrderRequest 주문요청 = requestTemplate.createPurchaseRequest("김지환", "01012345678", 주문_아이템);
 
-        // when & then - 주문 생성
-        mockMvc.perform(
-                        post("/api/orders")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(주문요청))
-                )
-                .andDo(print())
-                .andExpect(jsonPath("$.status").value("SUCCESS"))
-                .andExpect(jsonPath("$.body.orderId").exists())
-                .andExpect(jsonPath("$.body.ordererName").value("김지환"))
-                .andExpect(jsonPath("$.body.ordererPhoneNumber").value("01012345678"))
-                .andExpect(jsonPath("$.body.totalAmount").value(65000))
-                .andExpect(jsonPath("$.body.status").value("ORDER_COMPLETED"))
-                .andExpect(jsonPath("$.body.items.length()").value(2))
-                .andReturn();
+        // when
+        OrderResponse response = requestTemplate.postPurchaseOrder(주문요청);
+
+        // then
+        OrderId orderId = new OrderId(UUID.fromString(response.orderId()));
+        Order order = orderRepository.getByIdWithThrow(orderId);
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.ORDER_COMPLETED);
     }
 }

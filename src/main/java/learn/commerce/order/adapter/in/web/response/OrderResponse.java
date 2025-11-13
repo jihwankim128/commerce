@@ -3,23 +3,23 @@ package learn.commerce.order.adapter.in.web.response;
 import java.util.List;
 import learn.commerce.order.application.port.in.result.PurchaseResult;
 
-public record PurchaseOrderResponse(
+public record OrderResponse(
         String orderId,
         String ordererName,
         String ordererPhoneNumber,
         int totalAmount,
         String status,
-        List<PurchaseOrderItemResponse> items
+        List<OrderItemResponse> items
 ) {
-    public static PurchaseOrderResponse from(PurchaseResult result) {
-        return new PurchaseOrderResponse(
+    public static OrderResponse from(PurchaseResult result) {
+        return new OrderResponse(
                 result.orderId(),
                 result.ordererName(),
                 result.ordererPhoneNumber(),
                 result.totalAmount(),
                 result.status(),
                 result.items().stream()
-                        .map(PurchaseOrderItemResponse::from)
+                        .map(OrderItemResponse::from)
                         .toList()
         );
     }
