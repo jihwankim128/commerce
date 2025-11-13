@@ -1,5 +1,7 @@
 package learn.commerce.order.domain.vo;
 
+import learn.commerce.common.domain.Money;
+
 public record OrderItem(Product product, Money price, int quantity, Money totalAmount) {
     public OrderItem {
         if (product == null || price == null) {

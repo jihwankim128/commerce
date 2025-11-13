@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-import learn.commerce.order.domain.vo.Money;
+import learn.commerce.common.domain.Money;
 import learn.commerce.order.domain.vo.OrderId;
 import learn.commerce.order.domain.vo.OrderItem;
 import learn.commerce.order.domain.vo.OrderItems;

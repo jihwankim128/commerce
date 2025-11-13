@@ -37,7 +37,8 @@ class PaymentAcceptanceTest extends BaseAcceptanceTemplate {
         Map<String, Object> 결제요청 = Map.of(
                 "paymentKey", "test_payment_key_123",
                 "orderId", orderId,
-                "amount", 30000
+                "amount", 30000,
+                "method", "CARD"
         );
 
         // when
