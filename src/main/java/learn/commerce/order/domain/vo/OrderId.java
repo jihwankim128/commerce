@@ -1,6 +1,7 @@
 package learn.commerce.order.domain.vo;
 
 import java.util.UUID;
+import learn.commerce.common.utils.UuidConverter;
 
 public record OrderId(UUID value) {
     public OrderId {
@@ -11,6 +12,10 @@ public record OrderId(UUID value) {
 
     public static OrderId generate() {
         return new OrderId(UUID.randomUUID());
+    }
+
+    public static OrderId from(String orderId) {
+        return new OrderId(UuidConverter.fromString(orderId));
     }
 
     @Override
