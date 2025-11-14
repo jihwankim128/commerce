@@ -1,0 +1,105 @@
+<!-- src/main/resources/templates/orders.html -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head}"></head>
+<title>주문 내역</title>
+<body>
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+<div class="content">
+    <div class="container">
+        <h2 class="mb-4">📦 주문 내역</h2>
+
+        <div id="orders-list">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">로딩 중...</span>
+                </div>
+                <p class="text-muted mt-2">주문 내역을 불러오는 중...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    async function loadOrders() {
+        const ordersList = document.getElementById('orders-list');
+
+        try {
+            const response = await fetch('/api/orders');
+            const data = await response.json();
+
+            // 응답 실패
+            if (!response.ok || data.status === 'ERROR') {
+                throw new Error(data.body?.errors || '주문 내역을 불러오는데 실패했습니다.');
+            }
+
+            const orders = data.body; // 성공 시 body에 주문 목록
+
+            // 주문 내역 없음
+            if (!orders || orders.length === 0) {
+                ordersList.innerHTML = `
+                    <div class="text-center py-5">
+                        <svg width="64" height="64" fill="currentColor" class="text-muted mb-3" viewBox="0 0 16 16">
+                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                        </svg>
+                        <p class="text-muted">주문 내역이 없습니다.</p>
+                        <a href="/products" class="btn btn-primary mt-3">쇼핑하러 가기</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // 주문 목록 렌더링
+            ordersList.innerHTML = orders.map(order => `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="mb-1">주문번호: ${order.orderId}</h5>
+                                <small class="text-muted">${order.ordererName} | ${order.ordererPhoneNumber}</small>
+                            </div>
+                            <span class="badge bg-${order.status === 'PAYMENT_FULLFILL' ? 'success' : 'secondary'}">
+                                ${order.status === 'PAYMENT_FULLFILL' ? '결제완료' : order.status}
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            ${order.items.map(item => `
+                                <div class="d-flex justify-content-between text-sm mb-1">
+                                    <span>${item.productName} × ${item.quantity}</span>
+                                    <span>${(item.price * item.quantity).toLocaleString()}원</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">총 금액: ${order.totalAmount.toLocaleString()}원</h5>
+                            <a href="/orders/${order.orderId}" class="btn btn-outline-primary btn-sm">상세보기</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+        } catch (error) {
+            console.error('주문 내역 로드 실패:', error);
+            ordersList.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">
+                        <svg width="24" height="24" fill="currentColor" class="me-2" viewBox="0 0 16 16">
+                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                        </svg>
+                        오류
+                    </h4>
+                    <p class="mb-0">${error.message}</p>
+                    <hr>
+                    <button class="btn btn-outline-danger btn-sm" onclick="loadOrders()">다시 시도</button>
+                </div>
+            `;
+        }
+    }
+
+    loadOrders();
+</script>
+</body>
+</html>
