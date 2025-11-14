@@ -15,7 +15,8 @@ public class Order {
     private final Orderer orderer;
     private final OrderItems items;
     private final Money totalAmount;
-    private final OrderStatus status;
+    private OrderStatus status;
+    private String paymentId;
 
     private Order(OrderId orderId, Orderer orderer, OrderItems items) {
         if (orderId == null || orderer == null || items == null) {
@@ -34,5 +35,17 @@ public class Order {
 
     public List<OrderItem> getItems() {
         return items.items();
+    }
+
+    public boolean isPayable(Money amount) {
+        return totalAmount.equals(amount) && status.isComplete();
+    }
+
+    public void complete(String paymentId) {
+        if (paymentId == null || paymentId.isBlank()) {
+            throw new IllegalArgumentException("결제 식별자는 필수 정보입니다.");
+        }
+        this.paymentId = paymentId;
+        this.status = OrderStatus.PAYMENT_FULL_FILL;
     }
 }
