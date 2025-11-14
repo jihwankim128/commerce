@@ -1,0 +1,207 @@
+<!-- src/main/resources/templates/products.html -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head}"></head>
+<title>상품 목록</title>
+<body>
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+<div class="content">
+    <div class="container">
+        <h2 class="mb-4">🛍️ 상품 목록</h2>
+
+        <div class="row g-4" id="product-list">
+            <!-- 상품 카드 동적 생성 -->
+        </div>
+
+        <div class="card mt-4" id="cart-section" style="display: none;">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">🛒 장바구니</h5>
+            </div>
+            <div class="card-body">
+                <div id="cart-items"></div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">총 금액</h5>
+                    <h5 class="mb-0 text-primary" id="total-amount">0원</h5>
+                </div>
+
+                <!-- 주문자 정보 입력 -->
+                <div class="mb-3">
+                    <label class="form-label">주문자명</label>
+                    <input class="form-control" id="orderer-name" placeholder="홍길동" type="text">
+                    <div class="invalid-feedback" id="name-error"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">전화번호</label>
+                    <input class="form-control" id="orderer-phone" placeholder="01012345678" type="text">
+                    <div class="invalid-feedback" id="phone-error"></div>
+                </div>
+
+                <button class="btn btn-primary w-100" id="checkout-btn">결제하기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let cart = [];
+    let products = [];
+
+    async function loadProducts() {
+        const response = await fetch('/api/products');
+        const data = await response.json();
+        products = data.body;
+        renderProducts();
+    }
+
+    function renderProducts() {
+        const productList = document.getElementById('product-list');
+        productList.innerHTML = products.map(product => `
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.productName}</h5>
+                            <p class="card-text text-primary fw-bold">${product.price.toLocaleString()}원</p>
+                            <div class="input-group">
+                                <input type="number" class="form-control" value="1" min="1"
+                                       id="quantity-${product.productId}">
+                                <button class="btn btn-primary" onclick="addToCart('${product.productId}')">
+                                    담기
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+    }
+
+    function addToCart(productId) {
+        const product = products.find(p => p.productId === productId);
+        const quantity = parseInt(document.getElementById(`quantity-${productId}`).value);
+
+        const existingItem = cart.find(item => item.productId === productId);
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            cart.push({
+                productId: product.productId,
+                productName: product.productName,
+                price: product.price,
+                quantity: quantity
+            });
+        }
+
+        renderCart();
+    }
+
+    function renderCart() {
+        const cartSection = document.getElementById('cart-section');
+        const cartItems = document.getElementById('cart-items');
+
+        if (cart.length === 0) {
+            cartSection.style.display = 'none';
+            return;
+        }
+
+        cartSection.style.display = 'block';
+
+        cartItems.innerHTML = cart.map((item, index) => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <strong>${item.productName}</strong><br>
+                        <small class="text-muted">${item.price.toLocaleString()}원 × ${item.quantity}</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <strong>${(item.price * item.quantity).toLocaleString()}원</strong>
+                        <button class="btn btn-sm btn-danger" onclick="removeFromCart(${index})">삭제</button>
+                    </div>
+                </div>
+            `).join('');
+
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        document.getElementById('total-amount').textContent = total.toLocaleString() + '원';
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        renderCart();
+    }
+
+    function validateForm() {
+        const name = document.getElementById('orderer-name');
+        const phone = document.getElementById('orderer-phone');
+        const nameError = document.getElementById('name-error');
+        const phoneError = document.getElementById('phone-error');
+
+        let isValid = true;
+
+        // 이름 검증
+        if (!name.value.trim()) {
+            name.classList.add('is-invalid');
+            nameError.textContent = '주문자명을 입력해주세요.';
+            isValid = false;
+        } else {
+            name.classList.remove('is-invalid');
+        }
+
+        // 전화번호 검증
+        const phoneRegex = /^01[0-9]{8,9}$/;
+        if (!phone.value.trim()) {
+            phone.classList.add('is-invalid');
+            phoneError.textContent = '전화번호를 입력해주세요.';
+            isValid = false;
+        } else if (!phoneRegex.test(phone.value.trim())) {
+            phone.classList.add('is-invalid');
+            phoneError.textContent = '올바른 전화번호 형식이 아닙니다. (예: 01012345678)';
+            isValid = false;
+        } else {
+            phone.classList.remove('is-invalid');
+        }
+
+        return isValid;
+    }
+
+    document.getElementById('checkout-btn').addEventListener('click', async () => {
+        if (cart.length === 0) {
+            alert('장바구니가 비어있습니다.');
+            return;
+        }
+
+        if (!validateForm()) {
+            return;
+        }
+
+        const ordererName = document.getElementById('orderer-name').value.trim();
+        const ordererPhoneNumber = document.getElementById('orderer-phone').value.trim();
+
+        try {
+            const response = await fetch('/api/orders', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    ordererName: ordererName,
+                    ordererPhoneNumber: ordererPhoneNumber,
+                    items: cart
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok || data.status === "ERROR") {
+                throw new Error(data.body.errors || '주문 생성 실패');
+            }
+
+            const order = data.body
+            sessionStorage.setItem('orderData', JSON.stringify(order));
+            window.location.href = '/checkout';
+
+        } catch (error) {
+            alert('주문 생성 중 오류가 발생했습니다: ' + error.message);
+        }
+    });
+
+    loadProducts();
+</script>
+</body>
+</html>
