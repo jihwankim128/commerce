@@ -13,9 +13,7 @@ class PaymentMethodTest {
 
     public static Stream<Arguments> validMethodSources() {
         return Stream.of(
-                Arguments.of(PaymentMethod.CARD, "card"),   // 소문자
-                Arguments.of(PaymentMethod.CARD, "Card"),   // 대-소문자
-                Arguments.of(PaymentMethod.CARD, "CARD")    // 대문자
+                Arguments.of(PaymentMethod.CARD, "카드")
         );
     }
 
