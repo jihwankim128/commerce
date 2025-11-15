@@ -1,4 +1,4 @@
-package learn.commerce.order.adapter.in.web.request;
+package learn.commerce.order.adapter.in.api.request;
 
 import java.util.List;
 import learn.commerce.order.application.port.in.command.PurchaseOrder;

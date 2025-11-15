@@ -1,8 +1,8 @@
-package learn.commerce.order.adapter.in.web;
+package learn.commerce.order.adapter.in.api;
 
 import java.util.List;
-import learn.commerce.order.adapter.in.web.request.PurchaseOrderRequest;
-import learn.commerce.order.adapter.in.web.response.OrderResponse;
+import learn.commerce.order.adapter.in.api.request.PurchaseOrderRequest;
+import learn.commerce.order.adapter.in.api.response.OrderResponse;
 import learn.commerce.order.application.port.in.CreateOrderUseCase;
 import learn.commerce.order.application.port.in.command.PurchaseOrder;
 import learn.commerce.order.application.port.in.result.PurchaseResult;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/orders")
-public class OrderController {
+public class OrderApiController {
 
     private final CreateOrderUseCase createOrderUseCase;
     private final OrderQueryPort orderQueryPort;

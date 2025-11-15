@@ -2,7 +2,7 @@ package learn.commerce.order.adapter.out.query;
 
 import java.util.List;
 import learn.commerce.common.domain.Money;
-import learn.commerce.order.adapter.in.web.response.OrderResponse;
+import learn.commerce.order.adapter.in.api.response.OrderResponse;
 import learn.commerce.order.application.port.out.OrderQueryPort;
 import learn.commerce.order.domain.Order;
 import learn.commerce.order.domain.OrderRepository;

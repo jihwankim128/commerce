@@ -1,4 +1,4 @@
-package learn.commerce.order.adapter.in.web.request;
+package learn.commerce.order.adapter.in.api.request;
 
 import learn.commerce.order.application.port.in.command.PurchaseOrderItem;
 

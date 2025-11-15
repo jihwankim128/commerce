@@ -1,4 +1,4 @@
-package learn.commerce.temp;
+package learn.commerce.products;
 
 import java.util.List;
 import java.util.UUID;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/products")
-public class ProductWebController {
+public class ProductApiController {
     @GetMapping
     public List<ProductResponse> getProducts() {
         return List.of(

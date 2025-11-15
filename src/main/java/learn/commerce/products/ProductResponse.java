@@ -1,4 +1,4 @@
-package learn.commerce.temp;
+package learn.commerce.products;
 
 public record ProductResponse(
         String productId,

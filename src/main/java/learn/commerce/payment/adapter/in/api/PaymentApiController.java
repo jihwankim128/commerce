@@ -1,7 +1,7 @@
-package learn.commerce.payment.adapter.in.web;
+package learn.commerce.payment.adapter.in.api;
 
 import jakarta.validation.Valid;
-import learn.commerce.payment.adapter.in.web.dto.request.PaymentRequest;
+import learn.commerce.payment.adapter.in.api.dto.request.PaymentRequest;
 import learn.commerce.payment.application.port.in.ApprovePaymentUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
-public class PaymentController {
+public class PaymentApiController {
 
     private final ApprovePaymentUseCase approvePaymentUseCase;
 

@@ -1,4 +1,4 @@
-package learn.commerce.payment.adapter.in.web.dto.request;
+package learn.commerce.payment.adapter.in.api.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import learn.commerce.payment.application.port.dto.command.PaymentApproval;

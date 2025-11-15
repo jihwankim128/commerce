@@ -7,9 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import java.util.UUID;
-import learn.commerce.order.adapter.in.web.request.PurchaseOrderItemRequest;
-import learn.commerce.order.adapter.in.web.request.PurchaseOrderRequest;
-import learn.commerce.order.adapter.in.web.response.OrderResponse;
+import learn.commerce.order.adapter.in.api.request.PurchaseOrderItemRequest;
+import learn.commerce.order.adapter.in.api.request.PurchaseOrderRequest;
+import learn.commerce.order.adapter.in.api.response.OrderResponse;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;

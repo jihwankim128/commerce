@@ -1,4 +1,4 @@
-package learn.commerce.order.adapter.in.web.response;
+package learn.commerce.order.adapter.in.api.response;
 
 import learn.commerce.order.application.port.in.result.PurchaseItemResult;
 import learn.commerce.order.domain.vo.OrderItem;

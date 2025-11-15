@@ -6,10 +6,10 @@ import java.util.List;
 import learn.acceptance.template.BaseAcceptanceTemplate;
 import learn.acceptance.template.OrderRequestTemplate;
 import learn.acceptance.template.PaymentRequestTemplate;
-import learn.commerce.order.adapter.in.web.request.PurchaseOrderItemRequest;
-import learn.commerce.order.adapter.in.web.request.PurchaseOrderRequest;
-import learn.commerce.order.adapter.in.web.response.OrderResponse;
-import learn.commerce.payment.adapter.in.web.dto.request.PaymentRequest;
+import learn.commerce.order.adapter.in.api.request.PurchaseOrderItemRequest;
+import learn.commerce.order.adapter.in.api.request.PurchaseOrderRequest;
+import learn.commerce.order.adapter.in.api.response.OrderResponse;
+import learn.commerce.payment.adapter.in.api.dto.request.PaymentRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
