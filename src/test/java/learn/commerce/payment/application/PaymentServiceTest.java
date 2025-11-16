@@ -5,12 +5,12 @@ import static learn.commerce.payment.application.stub.ApprovalUseCaseStub.결제
 import static learn.commerce.payment.application.stub.ApprovalUseCaseStub.미주문_결제_스텁;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import learn.commerce.payment.application.port.dto.command.PaymentApproval;
 import learn.commerce.payment.application.port.out.OrderPaymentPort;
+import learn.commerce.payment.application.port.out.PaymentEventPort;
 import learn.commerce.payment.application.port.out.PaymentGatewayPort;
 import learn.commerce.payment.application.service.PaymentService;
 import learn.commerce.payment.domain.Payment;
@@ -30,6 +30,8 @@ class PaymentServiceTest {
     private OrderPaymentPort orderPaymentPort;
     @Mock
     private PaymentRepository paymentRepository;
+    @Mock
+    private PaymentEventPort paymentEventPort;
 
     @InjectMocks
     private PaymentService service;
@@ -66,6 +68,6 @@ class PaymentServiceTest {
 
         // then
         verify(paymentRepository, times(1)).save(any(Payment.class));
-        verify(orderPaymentPort, times(1)).completePayment(anyString(), anyString());
+        verify(paymentEventPort, times(1)).publishApproval(any(Payment.class));
     }
 }

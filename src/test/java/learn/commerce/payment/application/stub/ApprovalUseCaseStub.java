@@ -20,7 +20,6 @@ public class ApprovalUseCaseStub {
         PaymentApproval mockCommand = mock(PaymentApproval.class);
         when(mockCommand.orderId()).thenReturn("orderId");
         when(mockCommand.amount()).thenReturn(1000);
-        when(mockCommand.paymentKey()).thenReturn("paymentKey");
 
         Payment mockPayment = mock(Payment.class);
         when(mockCommand.toDomain(anyString())).thenReturn(mockPayment);

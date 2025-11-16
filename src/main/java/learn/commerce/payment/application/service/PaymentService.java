@@ -4,6 +4,7 @@ import learn.commerce.payment.application.port.dto.command.PaymentApproval;
 import learn.commerce.payment.application.port.dto.result.PaymentApprovalResult;
 import learn.commerce.payment.application.port.in.ApprovePaymentUseCase;
 import learn.commerce.payment.application.port.out.OrderPaymentPort;
+import learn.commerce.payment.application.port.out.PaymentEventPort;
 import learn.commerce.payment.application.port.out.PaymentGatewayPort;
 import learn.commerce.payment.domain.Payment;
 import learn.commerce.payment.domain.PaymentRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PaymentService implements ApprovePaymentUseCase {
 
+    private final PaymentEventPort eventPort;
     private final PaymentGatewayPort paymentGatewayPort;
     private final OrderPaymentPort orderPaymentPort;
     private final PaymentRepository paymentRepository;
@@ -27,7 +29,7 @@ public class PaymentService implements ApprovePaymentUseCase {
 
         Payment payment = command.toDomain(response.method());
         paymentRepository.save(payment);
-        orderPaymentPort.completePayment(command.orderId(), command.paymentKey());
+        eventPort.publishApproval(payment);
     }
 
     private void validatePayable(String orderId, int amount) {
