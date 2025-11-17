@@ -18,7 +18,7 @@ public record PurchaseResult(
                 order.getOrderer().phoneNumber(),
                 order.getTotalAmount().amount(),
                 order.getStatus().name(),
-                order.getItems().stream()
+                order.getItems().items().stream()
                         .map(PurchaseItemResult::from)
                         .toList()
         );

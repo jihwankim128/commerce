@@ -33,10 +33,6 @@ public class Order {
         return new Order(orderId, orderer, items);
     }
 
-    public List<OrderItem> getItems() {
-        return items.items();
-    }
-
     public boolean isPayable(Money amount) {
         return totalAmount.equals(amount) && status == OrderStatus.ORDER_COMPLETED;
     }
