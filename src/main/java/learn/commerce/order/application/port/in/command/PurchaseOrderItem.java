@@ -1,8 +1,8 @@
 package learn.commerce.order.application.port.in.command;
 
 import learn.commerce.common.domain.Money;
-import learn.commerce.order.domain.vo.OrderItem;
-import learn.commerce.order.domain.vo.Product;
+import learn.commerce.common.utils.UuidConverter;
+import learn.commerce.order.domain.OrderItem;
 
 public record PurchaseOrderItem(
         String productId,
@@ -13,7 +13,8 @@ public record PurchaseOrderItem(
 
     public OrderItem toDomain() {
         return OrderItem.of(
-                Product.from(productId, productName),
+                UuidConverter.fromString(productId),
+                productName,
                 new Money(price),
                 quantity
         );

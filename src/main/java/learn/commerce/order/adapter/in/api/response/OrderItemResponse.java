@@ -1,7 +1,7 @@
 package learn.commerce.order.adapter.in.api.response;
 
 import learn.commerce.order.application.port.in.result.PurchaseItemResult;
-import learn.commerce.order.domain.vo.OrderItem;
+import learn.commerce.order.domain.OrderItem;
 
 public record OrderItemResponse(
         String productId,
@@ -24,11 +24,11 @@ public record OrderItemResponse(
 
     public static OrderItemResponse from(OrderItem orderItem) {
         return new OrderItemResponse(
-                orderItem.product().id().toString(),
-                orderItem.product().name(),
-                orderItem.price().amount(),
-                orderItem.quantity(),
-                orderItem.totalAmount().amount(),
+                orderItem.getId().toString(),
+                orderItem.getName(),
+                orderItem.getPrice().amount(),
+                orderItem.getQuantity(),
+                orderItem.getTotalAmount().amount(),
                 null
         );
     }

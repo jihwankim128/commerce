@@ -64,7 +64,7 @@ class OrderAcceptanceTest extends BaseAcceptanceTemplate {
         // then
         OrderResponse 조회된_주문 = template.getOrder(orderId);
         assertThat(응답.status()).isEqualTo("SUCCESS");
-        assertThat(조회된_주문.status()).isEqualTo("CANCELD");
+        assertThat(조회된_주문.status()).isEqualTo("ORDER_CANCELD");
     }
 
     @Test

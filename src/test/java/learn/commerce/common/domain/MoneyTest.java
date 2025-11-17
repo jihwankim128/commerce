@@ -59,4 +59,16 @@ class MoneyTest {
         assertThatThrownBy(() -> baseMoney.multiply(3))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void 금액_간_뺼_수_있다() {
+        // given
+        Money baseMoney = new Money(1000);
+
+        // when
+        Money subtract = baseMoney.subtract(new Money(100));
+
+        // then
+        assertThat(subtract).isEqualTo(new Money(900));
+    }
 }

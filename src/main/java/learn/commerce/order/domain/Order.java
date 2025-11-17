@@ -1,9 +1,9 @@
 package learn.commerce.order.domain;
 
 import java.util.List;
+import java.util.UUID;
 import learn.commerce.common.domain.Money;
 import learn.commerce.order.domain.vo.OrderId;
-import learn.commerce.order.domain.vo.OrderItem;
 import learn.commerce.order.domain.vo.OrderItems;
 import learn.commerce.order.domain.vo.OrderStatus;
 import learn.commerce.order.domain.vo.Orderer;
@@ -38,7 +38,7 @@ public class Order {
     }
 
     public boolean isPayable(Money amount) {
-        return totalAmount.equals(amount) && status.isComplete();
+        return totalAmount.equals(amount) && status == OrderStatus.ORDER_COMPLETED;
     }
 
     public void complete(String paymentId) {
@@ -47,5 +47,29 @@ public class Order {
         }
         this.paymentId = paymentId;
         this.status = OrderStatus.PAYMENT_FULL_FILL;
+    }
+
+    public void cancel(List<UUID> productIds) {
+        determineCancelStrategy(productIds);
+        this.status = determineCancelStatus();
+    }
+
+    public Money calculateRemainingAmount() {
+        return totalAmount.subtract(items.calculateCanceledAmount());
+    }
+
+    private void determineCancelStrategy(List<UUID> productIds) {
+        if (productIds.isEmpty()) {
+            items.cancelAll();
+            return;
+        }
+        items.cancelPartial(productIds);
+    }
+
+    private OrderStatus determineCancelStatus() {
+        if (items.isAllCancel()) {
+            return OrderStatus.ORDER_CANCELED;
+        }
+        return OrderStatus.PARTIAL_CANCELED;
     }
 }

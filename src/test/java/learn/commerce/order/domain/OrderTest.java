@@ -3,16 +3,15 @@ package learn.commerce.order.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 import learn.commerce.common.domain.Money;
 import learn.commerce.order.domain.vo.OrderId;
-import learn.commerce.order.domain.vo.OrderItem;
 import learn.commerce.order.domain.vo.OrderItems;
 import learn.commerce.order.domain.vo.OrderStatus;
 import learn.commerce.order.domain.vo.Orderer;
-import learn.commerce.order.domain.vo.Product;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -26,7 +25,7 @@ class OrderTest {
     private static final OrderId validOrderId = OrderId.generate();
     private static final Orderer validOrderer = new Orderer("김지환", "01012345678");
     private static final OrderItems validOrderItems =
-            new OrderItems(List.of(OrderItem.of(new Product(UUID.randomUUID(), "상품"), new Money(1000), 5)));
+            new OrderItems(List.of(OrderItem.of(UUID.randomUUID(), "상품", new Money(1000), 5)));
 
     public static Stream<Arguments> invalidOrders() {
         return Stream.of(
@@ -34,6 +33,14 @@ class OrderTest {
                 Arguments.of(validOrderId, null, validOrderItems),
                 Arguments.of(validOrderId, validOrderer, null)
         );
+    }
+
+    private static OrderItems createOrderItemAsCount(int count) {
+        List<OrderItem> items = new ArrayList<>();
+        for (int i = 1; i <= count; i++) {
+            items.add(OrderItem.of(UUID.randomUUID(), "상품" + i, new Money(1000), 2));
+        }
+        return new OrderItems(items);
     }
 
     @ParameterizedTest
@@ -90,5 +97,32 @@ class OrderTest {
         // when & then
         assertThatThrownBy(() -> order.complete(invalidPaymentId))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 빈_상품_아이디로_주문을_취소한다면_전체_주문_취소가_된다() {
+        // given
+        Order order = Order.createOf(validOrderId, validOrderer, validOrderItems);
+
+        // when
+        order.cancel(List.of());
+
+        // then
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.ORDER_CANCELED);
+        assertThat(order.calculateRemainingAmount().amount()).isEqualTo(0);
+    }
+
+    @Test
+    void 상품_아이디로_주문을_취소한다면_부분_취소가_된다() {
+        // given: 단위 가격: 1000 * 수량: 2인 아이템 2개 = 총 4000원
+        OrderItems items = createOrderItemAsCount(2);
+        Order order = Order.createOf(validOrderId, validOrderer, items);
+
+        // when: 1번 아이템 취소
+        order.cancel(List.of(items.items().getFirst().getId()));
+
+        // then: 4000원 - 2000원(1개) = 2000원
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PARTIAL_CANCELED);
+        assertThat(order.calculateRemainingAmount().amount()).isEqualTo(2000);
     }
 }
