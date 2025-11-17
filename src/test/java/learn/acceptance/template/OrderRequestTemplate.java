@@ -5,8 +5,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
+import learn.commerce.common.ui.ApiTemplate;
+import learn.commerce.order.adapter.in.api.request.CancelOrderRequest;
 import learn.commerce.order.adapter.in.api.request.PurchaseOrderItemRequest;
 import learn.commerce.order.adapter.in.api.request.PurchaseOrderRequest;
 import learn.commerce.order.adapter.in.api.response.OrderResponse;
@@ -17,12 +22,18 @@ import org.springframework.test.web.servlet.MvcResult;
 @TestComponent
 public class OrderRequestTemplate extends BaseRequestTemplate {
 
-    public PurchaseOrderRequest createPurchaseRequest(String 구매자, String 연락처, List<PurchaseOrderItemRequest> 아이템) {
-        return new PurchaseOrderRequest(구매자, 연락처, 아이템);
-    }
+    private static final Random RANDOM = new Random();
 
-    public PurchaseOrderItemRequest createPurchaseItemRequest(String 상품명, int 가격, int 수량) {
-        return new PurchaseOrderItemRequest(UUID.randomUUID().toString(), 상품명, 가격, 수량);
+    public PurchaseOrderRequest createRequest(int itemCount) {
+        List<PurchaseOrderItemRequest> 주문_아이템 = new ArrayList<>();
+        for (int i = 1; i <= itemCount; i++) {
+            String productId = UUID.randomUUID().toString();
+            String productName = i + "번 째 상품";
+            int price = RANDOM.nextInt(10000, 100001) / 10000 * 10000;
+            int quantity = RANDOM.nextInt(1, 11);
+            주문_아이템.add(new PurchaseOrderItemRequest(productId, productName, price, quantity));
+        }
+        return new PurchaseOrderRequest("김지환", "01012345678", 주문_아이템);
     }
 
     public OrderResponse postPurchaseOrder(PurchaseOrderRequest 주문요청) throws Exception {
@@ -45,5 +56,17 @@ public class OrderRequestTemplate extends BaseRequestTemplate {
                 .andReturn();
 
         return extractBody(result, OrderResponse.class);
+    }
+
+    public <T> ApiTemplate<T> postCancelOrder(String orderId, CancelOrderRequest request,
+                                              TypeReference<ApiTemplate<T>> ref) throws Exception {
+        MvcResult result = mockMvc.perform(
+                        post("/api/orders/{orderId}/cancel", orderId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andReturn();
+        return extractResponse(result, ref);
     }
 }

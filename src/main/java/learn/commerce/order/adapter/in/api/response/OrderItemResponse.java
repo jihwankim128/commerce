@@ -8,7 +8,8 @@ public record OrderItemResponse(
         String productName,
         int price,
         int quantity,
-        int amount
+        int amount,
+        String status
 ) {
     public static OrderItemResponse from(PurchaseItemResult result) {
         return new OrderItemResponse(
@@ -16,7 +17,8 @@ public record OrderItemResponse(
                 result.productName(),
                 result.price(),
                 result.quantity(),
-                result.amount()
+                result.amount(),
+                null
         );
     }
 
@@ -26,7 +28,8 @@ public record OrderItemResponse(
                 orderItem.product().name(),
                 orderItem.price().amount(),
                 orderItem.quantity(),
-                orderItem.totalAmount().amount()
+                orderItem.totalAmount().amount(),
+                null
         );
     }
 }
