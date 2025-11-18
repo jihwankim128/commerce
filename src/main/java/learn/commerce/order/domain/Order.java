@@ -68,4 +68,11 @@ public class Order {
         }
         return OrderStatus.PARTIAL_CANCELED;
     }
+
+    public void confirm() {
+        if (this.status == OrderStatus.ORDER_COMPLETED) {
+            throw new IllegalArgumentException("아직 결제가 진행되지 않은 주문입니다.");
+        }
+        this.status = OrderStatus.PURCHASE_CONFIRMED;
+    }
 }

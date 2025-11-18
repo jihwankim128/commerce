@@ -125,4 +125,27 @@ class OrderTest {
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PARTIAL_CANCELED);
         assertThat(order.calculateRemainingAmount().amount()).isEqualTo(2000);
     }
+
+    @Test
+    void 주문은_결제가_완료되면_구매_확정처리를_할_수_있다() {
+        // given
+        Order order = Order.createOf(validOrderId, validOrderer, validOrderItems);
+        order.completePaid("paymentId");
+
+        // when
+        order.confirm();
+
+        // then
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PURCHASE_CONFIRMED);
+    }
+
+    @Test
+    void 결제_처리를_하지않은_주문은_구매_확정을_할_수_없다() {
+        // given
+        Order order = Order.createOf(validOrderId, validOrderer, validOrderItems);
+
+        // when & then
+        assertThatThrownBy(order::confirm)
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }
