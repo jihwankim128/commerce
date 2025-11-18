@@ -1,6 +1,8 @@
 package learn.commerce.order.application.service;
 
+import java.util.UUID;
 import learn.commerce.order.application.port.in.CancelOrderUseCase;
+import learn.commerce.order.application.port.in.ConfirmUseCase;
 import learn.commerce.order.application.port.in.CreateOrderUseCase;
 import learn.commerce.order.application.port.in.OrderPayUseCase;
 import learn.commerce.order.application.port.in.command.OrderCancellation;
@@ -15,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class OrderService implements CreateOrderUseCase, OrderPayUseCase, CancelOrderUseCase {
+public class OrderService implements CreateOrderUseCase, OrderPayUseCase, CancelOrderUseCase, ConfirmUseCase {
 
     private final CancelPaymentPort cancelPaymentPort;
     private final OrderRepository orderRepository;
@@ -44,6 +46,13 @@ public class OrderService implements CreateOrderUseCase, OrderPayUseCase, Cancel
                 order.getItems().calculateCanceledAmount(),
                 command.cancelReason()
         );
+        orderRepository.save(order);
+    }
+
+    @Override
+    public void confirm(UUID orderId) {
+        Order order = orderRepository.getByIdWithThrow(new OrderId(orderId));
+        order.confirm();
         orderRepository.save(order);
     }
 }
