@@ -27,6 +27,42 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const orderId = window.location.pathname.split('/').pop();
+    let currentOrder = null;
+
+    // 상태 배지 색상
+    function getStatusBadge(status) {
+        const badges = {
+            'ORDER_COMPLETED': 'secondary',
+            'PAYMENT_FULL_FILL': 'success',
+            'ORDER_CANCELLED': 'danger',
+            'PARTIAL_CANCELED': 'warning'
+        };
+        return badges[status] || 'secondary';
+    }
+
+    // 상태 텍스트
+    function getStatusText(status) {
+        const texts = {
+            'ORDER_COMPLETED': '주문완료',
+            'PAYMENT_FULL_FILL': '결제완료',
+            'ORDER_CANCELLED': '취소완료',
+            'PARTIAL_CANCELED': '부분취소'
+        };
+        return texts[status] || status;
+    }
+
+    // 취소 금액 계산
+    function calculateCanceledAmount(items) {
+        return items
+            .filter(item => item.status === 'CANCELED')
+            .reduce((sum, item) => sum + item.amount, 0);
+    }
+
+    // 남은 금액 계산
+    function calculateRemainingAmount(order) {
+        const canceled = calculateCanceledAmount(order.items);
+        return order.totalAmount - canceled;
+    }
 
     async function loadOrderDetail() {
         try {
@@ -37,82 +73,218 @@
             }
 
             const order = data.body;
+            currentOrder = order; // 전역 저장
+
+            const canceledAmount = calculateCanceledAmount(order.items);
+            const remainingAmount = calculateRemainingAmount(order);
+            const hasCanceled = canceledAmount > 0;
 
             document.getElementById('order-detail').innerHTML = `
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="card mb-3">
-                                <div class="card-header">
-                                    <h5 class="mb-0">주문 정보</h5>
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>주문번호:</strong> ${order.orderId}</p>
-                                    <p><strong>주문자:</strong> ${order.ordererName}</p>
-                                    <p><strong>전화번호:</strong> ${order.ordererPhoneNumber}</p>
-                                    <p><strong>주문 상태:</strong>
-                                        <span class="badge bg-${order.status === 'PAYMENT_FULLFILL' ? 'success' : 'secondary'}">
-                                            ${order.status === 'PAYMENT_FULLFILL' ? '결제완료' : order.status}
-                                        </span>
-                                    </p>
-                                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5 class="mb-0">주문 정보</h5>
                             </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">주문 상품</h5>
-                                </div>
-                                <div class="card-body">
-                                    ${order.items.map(item => `
-                                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
-                                            <div>
-                                                <h6 class="mb-1">${item.productName}</h6>
-                                                <small class="text-muted">${item.price.toLocaleString()}원 × ${item.quantity}개</small>
-                                            </div>
-                                            <strong>${item.amount.toLocaleString()}원</strong>
-                                        </div>
-                                    `).join('')}
-                                </div>
+                            <div class="card-body">
+                                <p><strong>주문번호:</strong> ${order.orderId}</p>
+                                <p><strong>주문자:</strong> ${order.ordererName}</p>
+                                <p><strong>전화번호:</strong> ${order.ordererPhoneNumber}</p>
+                                <p><strong>주문 상태:</strong>
+                                    <span class="badge bg-${getStatusBadge(order.status)}">
+                                        ${getStatusText(order.status)}
+                                    </span>
+                                </p>
                             </div>
                         </div>
 
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header bg-light">
-                                    <h5 class="mb-0">결제 정보</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>상품 금액</span>
-                                        <span>${order.totalAmount.toLocaleString()}원</span>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">주문 상품</h5>
+                            </div>
+                            <div class="card-body">
+                                ${order.items.map(item => `
+                                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                ${item.productName}
+                                                ${item.status === 'CANCELED' ?
+                '<span class="badge bg-secondary ms-2">취소됨</span>' : ''}
+                                            </h6>
+                                            <small class="text-muted ${item.status === 'CANCELED' ? 'text-decoration-line-through' : ''}">
+                                                ${item.price.toLocaleString()}원 × ${item.quantity}개
+                                            </small>
+                                        </div>
+                                        <strong class="${item.status === 'CANCELED' ? 'text-muted text-decoration-line-through' : ''}">
+                                            ${item.amount.toLocaleString()}원
+                                        </strong>
                                     </div>
-                                    <hr>
-                                    <div class="d-flex justify-content-between">
-                                        <h5 class="mb-0">총 결제 금액</h5>
-                                        <h5 class="mb-0 text-primary">${order.totalAmount.toLocaleString()}원</h5>
-                                    </div>
-                                </div>
+                                `).join('')}
                             </div>
                         </div>
                     </div>
-                `;
 
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const existingIndex = orders.findIndex(o => o.orderId === order.orderId);
-            if (existingIndex >= 0) {
-                orders[existingIndex] = order;
-            } else {
-                orders.unshift(order);
-            }
-            localStorage.setItem('orders', JSON.stringify(orders));
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">결제 정보</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>상품 금액</span>
+                                    <span>${order.totalAmount.toLocaleString()}원</span>
+                                </div>
+                                ${hasCanceled ? `
+                                    <div class="d-flex justify-content-between mb-2 text-danger">
+                                        <span>취소 금액</span>
+                                        <span>-${canceledAmount.toLocaleString()}원</span>
+                                    </div>
+                                ` : ''}
+                                <hr>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h5 class="mb-0">${hasCanceled ? '남은 금액' : '총 결제 금액'}</h5>
+                                    <h5 class="mb-0 text-primary">${remainingAmount.toLocaleString()}원</h5>
+                                </div>
+
+                                ${order.status === 'PAYMENT_FULL_FILL' ? `
+                                    <button class="btn btn-danger w-100" onclick="showCancelModal()">
+                                        주문 취소
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
         } catch (error) {
             document.getElementById('order-detail').innerHTML = `
-                    <div class="alert alert-danger text-center" role="alert">
-                        <h4 class="alert-heading">오류</h4>
-                        <p>${error.message}</p>
-                        <hr>
-                        <a href="/orders" class="btn btn-primary">주문 내역으로 돌아가기</a>
+                <div class="alert alert-danger text-center" role="alert">
+                    <h4 class="alert-heading">오류</h4>
+                    <p>${error.message}</p>
+                    <hr>
+                    <a href="/orders" class="btn btn-primary">주문 내역으로 돌아가기</a>
+                </div>
+            `;
+        }
+    }
+
+    function showCancelModal() {
+        if (!currentOrder) return;
+
+        const modalHtml = `
+            <div class="modal fade" id="cancelModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">주문 취소</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">취소 유형</label>
+                                <div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio"
+                                               name="cancelType" id="fullCancel" value="full" checked
+                                               onchange="togglePartialSelect()">
+                                        <label class="form-check-label" for="fullCancel">
+                                            전체 취소
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio"
+                                               name="cancelType" id="partialCancel" value="partial"
+                                               onchange="togglePartialSelect()">
+                                        <label class="form-check-label" for="partialCancel">
+                                            부분 취소
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="itemSelect" class="mb-3" style="display: none;">
+                                <label class="form-label">취소할 상품 선택</label>
+                                ${currentOrder.items
+            .filter(item => item.status !== 'CANCELED')
+            .map(item => `
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox"
+                                                   value="${item.productId}" id="item-${item.productId}">
+                                            <label class="form-check-label" for="item-${item.productId}">
+                                                ${item.productName} (${item.amount.toLocaleString()}원)
+                                            </label>
+                                        </div>
+                                    `).join('')}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cancelReason" class="form-label">취소 사유</label>
+                                <textarea class="form-control" id="cancelReason"
+                                          rows="3" placeholder="취소 사유를 입력하세요" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                            <button type="button" class="btn btn-danger" onclick="submitCancel()">취소 확정</button>
+                        </div>
                     </div>
-                `;
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+        modal.show();
+
+        document.getElementById('cancelModal').addEventListener('hidden.bs.modal', function () {
+            this.remove();
+        });
+    }
+
+    function togglePartialSelect() {
+        const isPartial = document.getElementById('partialCancel').checked;
+        document.getElementById('itemSelect').style.display = isPartial ? 'block' : 'none';
+    }
+
+    async function submitCancel() {
+        const cancelType = document.querySelector('input[name="cancelType"]:checked').value;
+        const cancelReason = document.getElementById('cancelReason').value.trim();
+
+        if (!cancelReason) {
+            alert('취소 사유를 입력하세요.');
+            return;
+        }
+
+        let productIds = [];
+        if (cancelType === 'partial') {
+            const checked = document.querySelectorAll('#itemSelect input:checked');
+            if (checked.length === 0) {
+                alert('취소할 상품을 선택하세요.');
+                return;
+            }
+            productIds = Array.from(checked).map(cb => cb.value);
+        }
+
+        try {
+            const response = await fetch(`/api/orders/${orderId}/cancel`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({productIds, cancelReason})
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || data.status === 'ERROR') {
+                throw new Error(data.body?.errors || '취소에 실패했습니다.');
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById('cancelModal')).hide();
+            alert('주문이 취소되었습니다.');
+            loadOrderDetail();
+
+        } catch (error) {
+            alert(error.message);
         }
     }
 

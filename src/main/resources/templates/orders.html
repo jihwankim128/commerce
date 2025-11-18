@@ -23,6 +23,32 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    function getStatusBadge(status) {
+        const badges = {
+            'ORDER_COMPLETED': 'secondary',
+            'PAYMENT_FULL_FILL': 'success',
+            'ORDER_CANCELLED': 'danger',
+            'PARTIAL_CANCELED': 'warning'
+        };
+        return badges[status] || 'secondary';
+    }
+
+    function getStatusText(status) {
+        const texts = {
+            'ORDER_COMPLETED': '주문완료',
+            'PAYMENT_FULL_FILL': '결제완료',
+            'ORDER_CANCELLED': '취소완료',
+            'PARTIAL_CANCELED': '부분취소'
+        };
+        return texts[status] || status;
+    }
+
+    function calculateCanceledAmount(items) {
+        return items
+            .filter(item => item.status === 'CANCELED')
+            .reduce((sum, item) => sum + item.amount, 0);
+    }
+
     async function loadOrders() {
         const ordersList = document.getElementById('orders-list');
 
@@ -30,14 +56,12 @@
             const response = await fetch('/api/orders');
             const data = await response.json();
 
-            // 응답 실패
             if (!response.ok || data.status === 'ERROR') {
                 throw new Error(data.body?.errors || '주문 내역을 불러오는데 실패했습니다.');
             }
 
-            const orders = data.body; // 성공 시 body에 주문 목록
+            const orders = data.body;
 
-            // 주문 내역 없음
             if (!orders || orders.length === 0) {
                 ordersList.innerHTML = `
                     <div class="text-center py-5">
@@ -51,35 +75,51 @@
                 return;
             }
 
-            // 주문 목록 렌더링
-            ordersList.innerHTML = orders.map(order => `
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div>
-                                <h5 class="mb-1">주문번호: ${order.orderId}</h5>
-                                <small class="text-muted">${order.ordererName} | ${order.ordererPhoneNumber}</small>
-                            </div>
-                            <span class="badge bg-${order.status === 'PAYMENT_FULLFILL' ? 'success' : 'secondary'}">
-                                ${order.status === 'PAYMENT_FULLFILL' ? '결제완료' : order.status}
-                            </span>
-                        </div>
-                        <div class="mb-3">
-                            ${order.items.map(item => `
-                                <div class="d-flex justify-content-between text-sm mb-1">
-                                    <span>${item.productName} × ${item.quantity}</span>
-                                    <span>${(item.price * item.quantity).toLocaleString()}원</span>
+            ordersList.innerHTML = orders.map(order => {
+                const canceledAmount = calculateCanceledAmount(order.items);
+                const remainingAmount = order.totalAmount - canceledAmount;
+                const hasCanceled = canceledAmount > 0;
+
+                return `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="mb-1">주문번호: ${order.orderId}</h5>
+                                    <small class="text-muted">${order.ordererName} | ${order.ordererPhoneNumber}</small>
                                 </div>
-                            `).join('')}
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">총 금액: ${order.totalAmount.toLocaleString()}원</h5>
-                            <a href="/orders/${order.orderId}" class="btn btn-outline-primary btn-sm">상세보기</a>
+                                <span class="badge bg-${getStatusBadge(order.status)}">
+                                    ${getStatusText(order.status)}
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                ${order.items.map(item => `
+                                    <div class="d-flex justify-content-between text-sm mb-1">
+                                        <span ${item.status === 'CANCELED' ? 'class="text-muted text-decoration-line-through"' : ''}>
+                                            ${item.productName} × ${item.quantity}
+                                            ${item.status === 'CANCELED' ? '<span class="badge bg-secondary ms-1">취소</span>' : ''}
+                                        </span>
+                                        <span ${item.status === 'CANCELED' ? 'class="text-muted text-decoration-line-through"' : ''}>
+                                            ${item.amount.toLocaleString()}원
+                                        </span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <hr>
+                            ${hasCanceled ? `
+                                <div class="d-flex justify-content-between text-sm mb-2 text-danger">
+                                    <span>취소 금액</span>
+                                    <span>-${canceledAmount.toLocaleString()}원</span>
+                                </div>
+                            ` : ''}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">${hasCanceled ? '남은 금액' : '총 금액'}: ${remainingAmount.toLocaleString()}원</h5>
+                                <a href="/orders/${order.orderId}" class="btn btn-outline-primary btn-sm">상세보기</a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
         } catch (error) {
             console.error('주문 내역 로드 실패:', error);
