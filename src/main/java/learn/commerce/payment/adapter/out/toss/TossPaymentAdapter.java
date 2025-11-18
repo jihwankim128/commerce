@@ -55,7 +55,7 @@ public class TossPaymentAdapter implements PaymentGatewayPort {
         TossPaymentCancelDto dto = new TossPaymentCancelDto(cancelReason, cancelAmount);
         executeApiCall(() -> {
             restClient.post()
-                    .uri("/payments/{paymentKey}/cancel", paymentKey)
+                    .uri("/{paymentKey}/cancel", paymentKey)
                     .body(dto)
                     .retrieve()
                     .toBodilessEntity();

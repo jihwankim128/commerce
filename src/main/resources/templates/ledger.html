@@ -1,0 +1,126 @@
+<!-- src/main/resources/templates/ledger.html -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head}"></head>
+<title>장부 내역</title>
+<body>
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+<div class="content">
+    <div class="container">
+        <h2 class="mb-4">💰 장부 내역</h2>
+
+        <div id="ledger-list">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">로딩 중...</span>
+                </div>
+                <p class="text-muted mt-2">장부 내역을 불러오는 중...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    async function loadLedger() {
+        const ledgerList = document.getElementById('ledger-list');
+
+        try {
+            const response = await fetch('/api/payments');
+            const data = await response.json();
+
+            if (!response.ok || data.status === 'ERROR') {
+                throw new Error(data.body?.errors || '장부 내역을 불러오는데 실패했습니다.');
+            }
+
+            const payments = data.body;
+            console.log(payments);
+
+            if (!payments || payments.length === 0) {
+                ledgerList.innerHTML = `
+                    <div class="text-center py-5">
+                        <svg width="64" height="64" fill="currentColor" class="text-muted mb-3" viewBox="0 0 16 16">
+                            <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73l.348.086z"/>
+                        </svg>
+                        <p class="text-muted">장부 내역이 없습니다.</p>
+                        <a href="/products" class="btn btn-primary mt-3">쇼핑하러 가기</a>
+                    </div>
+                `;
+                return;
+            }
+
+            ledgerList.innerHTML = payments.map(payment => `
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">결제번호: ${payment.id}</h6>
+                                <small class="text-muted">주문번호: ${payment.orderId}</small>
+                            </div>
+                            <span class="badge bg-${payment.status === 'DONE' ? 'success' : payment.status === 'CANCELED' ? 'danger' : 'secondary'}">
+                                ${payment.status === 'DONE' ? '결제 완료' : ((payment.status === 'CANCELED') ? '결제 취소' : payment.status)}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <p class="mb-1 text-muted">승인 금액</p>
+                                <h5 class="mb-0">${payment.approvedAmount.toLocaleString()}원</h5>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-1 text-muted">취소 금액</p>
+                                <h5 class="mb-0 text-danger">${payment.canceledAmount.toLocaleString()}원</h5>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-1 text-muted">잔액</p>
+                                <h5 class="mb-0 text-primary">${payment.balanceAmount.toLocaleString()}원</h5>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-1 text-muted">결제 수단</p>
+                                <h5 class="mb-0">${payment.method}</h5>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h6 class="mb-3">거래 내역</h6>
+                        ${payment.ledgers.map(ledger => `
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-start border-${ledger.type === 'APPROVE' ? 'success' : 'danger'} border-3 bg-light">
+                                <div>
+                                    <span class="badge bg-${ledger.type === 'APPROVE' ? 'success' : 'danger'} me-2">
+                                        ${ledger.type === 'APPROVE' ? '승인' : '취소'}
+                                    </span>
+                                    <strong>${ledger.amount.toLocaleString()}원</strong>
+                                    <small class="text-muted ms-2">${ledger.reason}</small>
+                                </div>
+                                <small class="text-muted">${new Date(ledger.recordedAt).toLocaleString('ko-KR')}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+        } catch (error) {
+            console.error('장부 내역 로드 실패:', error);
+            ledgerList.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">
+                        <svg width="24" height="24" fill="currentColor" class="me-2" viewBox="0 0 16 16">
+                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                        </svg>
+                        오류
+                    </h4>
+                    <p class="mb-0">${error.message}</p>
+                    <hr>
+                    <button class="btn btn-outline-danger btn-sm" onclick="loadLedger()">다시 시도</button>
+                </div>
+            `;
+        }
+    }
+
+    loadLedger();
+</script>
+</body>
+</html>

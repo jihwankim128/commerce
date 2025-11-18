@@ -30,14 +30,14 @@ public record Ledgers(List<Ledger> ledgers) {
         return calculateBalanceAmount().equals(Money.ZERO);
     }
 
-    private Money calculatedCanceledAmount() {
+    public Money calculatedCanceledAmount() {
         return ledgers.stream()
                 .filter(Ledger::isCanceled)
                 .map(Ledger::getAmount)
                 .reduce(Money.ZERO, Money::add);
     }
 
-    private Money calculatedApprovedAmount() {
+    public Money calculatedApprovedAmount() {
         return ledgers.stream()
                 .filter(Ledger::isApproved)
                 .map(Ledger::getAmount)
