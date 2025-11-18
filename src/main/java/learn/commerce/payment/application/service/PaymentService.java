@@ -1,8 +1,10 @@
 package learn.commerce.payment.application.service;
 
 import learn.commerce.payment.application.port.dto.command.PaymentApproval;
+import learn.commerce.payment.application.port.dto.command.PaymentCancellation;
 import learn.commerce.payment.application.port.dto.result.PaymentApprovalResult;
 import learn.commerce.payment.application.port.in.ApprovePaymentUseCase;
+import learn.commerce.payment.application.port.in.CancelPaymentUseCase;
 import learn.commerce.payment.application.port.out.OrderPaymentPort;
 import learn.commerce.payment.application.port.out.PaymentEventPort;
 import learn.commerce.payment.application.port.out.PaymentGatewayPort;
@@ -13,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class PaymentService implements ApprovePaymentUseCase {
+public class PaymentService implements ApprovePaymentUseCase, CancelPaymentUseCase {
 
     private final PaymentEventPort eventPort;
     private final PaymentGatewayPort paymentGatewayPort;
@@ -42,5 +44,18 @@ public class PaymentService implements ApprovePaymentUseCase {
         if (!paymentGatewayPort.validateApproval(approvalStatus)) {
             throw new IllegalArgumentException("결제 승인에 실패했습니다.");
         }
+    }
+
+    @Override
+    public void cancel(PaymentCancellation command) {
+        Payment payment = paymentRepository.getByIdWithThrow(command.toPaymentId());
+        payment.cancel(command.toCancelAmount(), command.cancelReason());
+
+        paymentGatewayPort.cancelPayment(
+                payment.getPaymentKey(),
+                command.cancelAmount(),
+                command.cancelReason()
+        );
+        paymentRepository.save(payment);
     }
 }
