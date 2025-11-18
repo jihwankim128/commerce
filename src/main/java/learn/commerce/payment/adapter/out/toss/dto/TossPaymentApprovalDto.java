@@ -2,13 +2,13 @@ package learn.commerce.payment.adapter.out.toss.dto;
 
 import learn.commerce.payment.application.port.dto.command.PaymentApproval;
 
-public record TossPaymentRequest(
+public record TossPaymentApprovalDto(
         String paymentKey,
         String orderId,
         Integer amount
 ) {
-    public static TossPaymentRequest from(PaymentApproval approval) {
-        return new TossPaymentRequest(
+    public static TossPaymentApprovalDto from(PaymentApproval approval) {
+        return new TossPaymentApprovalDto(
                 approval.paymentKey(),
                 approval.orderId(),
                 approval.amount()
