@@ -80,7 +80,7 @@ class OrderTest {
         Order order = Order.createOf(validOrderId, validOrderer, validOrderItems);
 
         // when
-        order.complete("paymentId");
+        order.completePaid("paymentId");
 
         // then
         assertThat(order.getPaymentId()).isEqualTo("paymentId");
@@ -95,7 +95,7 @@ class OrderTest {
         Order order = Order.createOf(validOrderId, validOrderer, validOrderItems);
 
         // when & then
-        assertThatThrownBy(() -> order.complete(invalidPaymentId))
+        assertThatThrownBy(() -> order.completePaid(invalidPaymentId))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

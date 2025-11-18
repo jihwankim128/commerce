@@ -1,6 +1,6 @@
 package learn.commerce.order.adapter.in.event;
 
-import learn.commerce.order.application.port.in.UpdateOrderUseCase;
+import learn.commerce.order.application.port.in.OrderPayUseCase;
 import learn.commerce.order.domain.vo.OrderId;
 import learn.commerce.payment.adapter.out.event.dto.ApprovalEvent;
 import lombok.RequiredArgsConstructor;
@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PaymentEventListener {
 
-    private final UpdateOrderUseCase updateOrderUseCase;
+    private final OrderPayUseCase orderPayUseCase;
 
     @Async
     @EventListener
     public void completePayment(ApprovalEvent event) {
-        updateOrderUseCase.complete(OrderId.from(event.orderId()), event.paymentId());
+        orderPayUseCase.completePaid(OrderId.from(event.orderId()), event.paymentId());
     }
 }

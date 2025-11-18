@@ -37,7 +37,7 @@ public class Order {
         return totalAmount.equals(amount) && status == OrderStatus.ORDER_COMPLETED;
     }
 
-    public void complete(String paymentId) {
+    public void completePaid(String paymentId) {
         if (paymentId == null || paymentId.isBlank()) {
             throw new IllegalArgumentException("결제 식별자는 필수 정보입니다.");
         }
