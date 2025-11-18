@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class MoneyTest {
 
@@ -70,5 +72,18 @@ class MoneyTest {
 
         // then
         assertThat(subtract).isEqualTo(new Money(900));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"999,false", "1001,true"})
+    void 금액_간_비교할_수_있다(int amount, boolean expected) {
+        // given
+        Money baseMoney = new Money(1000);
+
+        // when
+        boolean compared = baseMoney.isLessThan(new Money(amount));
+
+        // then
+        assertThat(compared).isEqualTo(expected);
     }
 }

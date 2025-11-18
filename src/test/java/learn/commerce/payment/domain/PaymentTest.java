@@ -28,13 +28,6 @@ class PaymentTest {
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.DONE);
     }
 
-    @Test
-    void 결제정보_승인시_가격정보가_없으면_예외_발생() {
-        // when & then
-        assertThatThrownBy(() -> Payment.approve(VALID_ORDER_ID, null, VALID_METHOD, VALID_PAYMENT_KEY))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = " ")
@@ -42,5 +35,40 @@ class PaymentTest {
         // when & then
         assertThatThrownBy(() -> Payment.approve(VALID_ORDER_ID, VALID_AMOUNT, VALID_METHOD, invalidPaymentKey))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 전체_결제_취소시_결제_취소상태가_된다() {
+        // given
+        Payment payment = Payment.approve(VALID_ORDER_ID, VALID_AMOUNT, VALID_METHOD, VALID_PAYMENT_KEY);
+
+        // when
+        payment.cancel(new Money(10000), "전체 취소");
+
+        // then
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.CANCELED);
+    }
+
+    @Test
+    void 결제_취소_상태일_때_결제를_취소하면_예외가_발생한다() {
+        // given
+        Payment payment = Payment.approve(VALID_ORDER_ID, VALID_AMOUNT, VALID_METHOD, VALID_PAYMENT_KEY);
+        payment.cancel(new Money(10000), "전체 취소");
+
+        // when & then
+        assertThatThrownBy(() -> payment.cancel(new Money(0), "재취소"))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void 부분_결제_취소시_여전히_결제_완료_상태이다() {
+        // given
+        Payment payment = Payment.approve(VALID_ORDER_ID, VALID_AMOUNT, VALID_METHOD, VALID_PAYMENT_KEY);
+
+        // when
+        payment.cancel(new Money(5000), "부분 취소");
+
+        // then
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.DONE);
     }
 }

@@ -27,7 +27,11 @@ public record Money(int amount) {
         }
     }
 
-    public Money subtract(Money money) {
-        return new Money(amount - money.amount);
+    public Money subtract(Money other) {
+        return new Money(amount - other.amount);
+    }
+
+    public boolean isLessThan(Money other) {
+        return amount < other.amount;
     }
 }
