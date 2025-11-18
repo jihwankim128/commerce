@@ -5,11 +5,11 @@ import java.util.UUID;
 import learn.commerce.order.domain.vo.OrderId;
 
 public record OrderCancellation(
-        String orderId,
+        UUID orderId,
         List<UUID> productIds,
         String cancelReason
 ) {
     public OrderId toOrderId() {
-        return OrderId.from(orderId);
+        return new OrderId(orderId);
     }
 }

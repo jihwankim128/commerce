@@ -64,7 +64,7 @@ class OrderAcceptanceTest extends BaseAcceptanceTemplate {
         // then
         OrderResponse 조회된_주문 = template.getOrder(orderId);
         assertThat(응답.status()).isEqualTo("SUCCESS");
-        assertThat(조회된_주문.status()).isEqualTo("ORDER_CANCELD");
+        assertThat(조회된_주문.status()).isEqualTo("ORDER_CANCELED");
     }
 
     @Test
@@ -72,7 +72,7 @@ class OrderAcceptanceTest extends BaseAcceptanceTemplate {
         // given
         PurchaseOrderRequest req = template.createRequest(3);
         OrderResponse res = template.postPurchaseOrder(req);
-        String productId = res.items().getFirst().productId();
+        UUID productId = UUID.fromString(res.items().getFirst().productId());
         CancelOrderRequest 취소요청 = new CancelOrderRequest(List.of(productId), "단순 변심");
         paymentTemplate.postPaymentConfirm(new PaymentRequest("test_key", res.orderId(), res.totalAmount()));
 
@@ -94,7 +94,7 @@ class OrderAcceptanceTest extends BaseAcceptanceTemplate {
         // given
         PurchaseOrderRequest req = template.createRequest(3);
         OrderResponse res = template.postPurchaseOrder(req);
-        String productId = res.items().getFirst().productId();
+        UUID productId = UUID.fromString(res.items().getFirst().productId());
         CancelOrderRequest 취소요청 = new CancelOrderRequest(List.of(productId), "단순 변심");
         paymentTemplate.postPaymentConfirm(new PaymentRequest("test_key", res.orderId(), res.totalAmount()));
         template.postCancelOrder(res.orderId(), 취소요청, new TypeReference<>() {
@@ -106,6 +106,6 @@ class OrderAcceptanceTest extends BaseAcceptanceTemplate {
 
         // then
         assertThat(응답.status()).isEqualTo("ERROR");
-        assertThat(응답.body().errors()).contains("중복");
+        assertThat(응답.body().errors()).contains("이미", "주문", "취소된");
     }
 }

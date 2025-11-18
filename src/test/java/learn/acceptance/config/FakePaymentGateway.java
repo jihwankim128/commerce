@@ -25,4 +25,9 @@ public class FakePaymentGateway implements PaymentGatewayPort {
     public boolean validateApproval(String paymentStatus) {
         return true;
     }
+
+    @Override
+    public void cancelPayment(String paymentKey, int cancelAmount, String cancelReason) {
+
+    }
 }

@@ -18,7 +18,7 @@ public record OrderItemResponse(
                 result.price(),
                 result.quantity(),
                 result.amount(),
-                null
+                result.status()
         );
     }
 
@@ -29,7 +29,7 @@ public record OrderItemResponse(
                 orderItem.getPrice().amount(),
                 orderItem.getQuantity(),
                 orderItem.getTotalAmount().amount(),
-                null
+                orderItem.getStatus().name()
         );
     }
 }

@@ -7,7 +7,8 @@ public record PurchaseItemResult(
         String productName,
         int price,
         int quantity,
-        int amount
+        int amount,
+        String status
 ) {
     public static PurchaseItemResult from(OrderItem orderItem) {
         return new PurchaseItemResult(
@@ -15,7 +16,8 @@ public record PurchaseItemResult(
                 orderItem.getName(),
                 orderItem.getPrice().amount(),
                 orderItem.getQuantity(),
-                orderItem.getTotalAmount().amount()
+                orderItem.getTotalAmount().amount(),
+                orderItem.getStatus().name()
         );
     }
 }
