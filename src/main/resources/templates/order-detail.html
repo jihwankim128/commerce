@@ -32,6 +32,7 @@
     // 상태 배지 색상
     function getStatusBadge(status) {
         const badges = {
+            'PURCHASE_CONFIRMED': 'primary',
             'ORDER_COMPLETED': 'secondary',
             'PAYMENT_FULL_FILL': 'success',
             'ORDER_CANCELLED': 'danger',
@@ -43,6 +44,7 @@
     // 상태 텍스트
     function getStatusText(status) {
         const texts = {
+            'PURCHASE_CONFIRMED': '구매확정',
             'ORDER_COMPLETED': '주문완료',
             'PAYMENT_FULL_FILL': '결제완료',
             'ORDER_CANCELLED': '취소완료',
@@ -142,14 +144,25 @@
                                 ` : ''}
                                 <hr>
                                 <div class="d-flex justify-content-between mb-3">
-                                    <h5 class="mb-0">${hasCanceled ? '남은 금액' : '총 결제 금액'}</h5>
+                                    <h5 class="mb-0">결제 금액</h5>
                                     <h5 class="mb-0 text-primary">${remainingAmount.toLocaleString()}원</h5>
                                 </div>
 
-                                ${order.status === 'PAYMENT_FULL_FILL' ? `
-                                    <button class="btn btn-danger w-100" onclick="showCancelModal()">
+                                ${(order.status === 'PAYMENT_FULL_FILL' || order.status === 'PARTIAL_CANCELED') ? `
+                                    <button class="btn btn-success w-100 mb-2" onclick="confirmPurchase()">
+                                        구매 확정
+                                    </button>
+                                    <button class="btn btn-outline-danger w-100" onclick="showCancelModal()">
                                         주문 취소
                                     </button>
+                                ` : order.status === 'PURCHASE_CONFIRMED' ? `
+                                    <div class="alert alert-success mb-0" role="alert">
+                                        ✅ 구매 확정 완료
+                                    </div>
+                                ` : order.status === 'ORDER_CANCELLED' ? `
+                                    <div class="alert alert-danger mb-0" role="alert">
+                                        ❌ 주문 취소 완료
+                                    </div>
                                 ` : ''}
                             </div>
                         </div>
@@ -281,6 +294,31 @@
 
             bootstrap.Modal.getInstance(document.getElementById('cancelModal')).hide();
             alert('주문이 취소되었습니다.');
+            loadOrderDetail();
+
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    async function confirmPurchase() {
+        if (!confirm('구매를 확정하시겠습니까?\n확정 후에는 취소할 수 없습니다.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/orders/${orderId}/confirm`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || data.status === 'ERROR') {
+                throw new Error(data.body?.errors || '구매 확정에 실패했습니다.');
+            }
+
+            alert('구매가 확정되었습니다.');
             loadOrderDetail();
 
         } catch (error) {
