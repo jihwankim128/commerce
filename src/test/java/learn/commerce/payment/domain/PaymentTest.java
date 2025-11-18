@@ -57,7 +57,7 @@ class PaymentTest {
 
         // when & then
         assertThatThrownBy(() -> payment.cancel(new Money(0), "재취소"))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
