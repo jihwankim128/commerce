@@ -1,5 +1,9 @@
 package learn.acceptance.template;
 
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -18,6 +22,7 @@ import learn.commerce.order.adapter.in.api.response.OrderResponse;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultHandler;
 
 @TestComponent
 public class OrderRequestTemplate extends BaseRequestTemplate {
@@ -42,7 +47,10 @@ public class OrderRequestTemplate extends BaseRequestTemplate {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(주문요청))
                 )
-                .andDo(print())
+                .andDo(document("order-purchase",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ))
                 .andExpect(jsonPath("$.status").value("SUCCESS"))
                 .andReturn();
 
@@ -51,7 +59,10 @@ public class OrderRequestTemplate extends BaseRequestTemplate {
 
     public OrderResponse getOrder(String orderId) throws Exception {
         MvcResult result = mockMvc.perform(get("/api/orders/{orderId}", orderId))
-                .andDo(print())
+                .andDo(document("order-get",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ))
                 .andExpect(jsonPath("$.status").value("SUCCESS"))
                 .andReturn();
 
@@ -60,19 +71,28 @@ public class OrderRequestTemplate extends BaseRequestTemplate {
 
     public <T> ApiTemplate<T> postCancelOrder(String orderId, CancelOrderRequest request,
                                               TypeReference<ApiTemplate<T>> ref) throws Exception {
+        ResultHandler handler;
+        if (request.productIds().isEmpty()) {
+            handler = document("order-cancel", preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint()));
+        } else {
+            handler = print();
+        }
         MvcResult result = mockMvc.perform(
                         post("/api/orders/{orderId}/cancel", orderId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
-                .andDo(print())
+                .andDo(handler)
                 .andReturn();
         return extractResponse(result, ref);
     }
 
     public <T> ApiTemplate<T> postConfirmOrder(UUID orderId, TypeReference<ApiTemplate<T>> ref) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/orders/{orderId}/confirm", orderId))
-                .andDo(print())
+                .andDo(document("order-confirm",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ))
                 .andReturn();
         return extractResponse(result, ref);
     }
