@@ -41,7 +41,7 @@ public class Payment {
 
     public void cancel(Money cancelAmount, String reason) {
         if (this.status == PaymentStatus.CANCELED) {
-            throw new IllegalStateException("이미 취소가 완료된 결제입니다");
+            throw new IllegalArgumentException("이미 취소가 완료된 결제입니다");
         }
 
         ledgers.recordCancellation(cancelAmount, reason);

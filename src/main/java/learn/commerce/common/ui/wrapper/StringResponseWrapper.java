@@ -30,7 +30,7 @@ public class StringResponseWrapper implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                   ServerHttpRequest request, ServerHttpResponse response) {
-        log.info("EXECUTE AOP ==> returnType {}, convertType {}", returnType, selectedConverterType);
+        log.info("EXECUTE Advice ==> returnType {}, convertType {}", returnType, selectedConverterType);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
         try {
             return objectMapper.writeValueAsString(ApiTemplate.success(body));

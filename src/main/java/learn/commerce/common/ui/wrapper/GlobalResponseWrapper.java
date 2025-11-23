@@ -24,9 +24,9 @@ public class GlobalResponseWrapper implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                   ServerHttpRequest request, ServerHttpResponse response) {
-        log.info("EXECUTE AOP ==> returnType {}, convertType {}", returnType, selectedConverterType);
-        if (body instanceof ExceptionResponse) {
-            return ApiTemplate.error(body);
+        log.info("EXECUTE Advice ==> returnType {}, convertType {}", returnType, selectedConverterType);
+        if (body instanceof ExceptionResponse exception) {
+            return ApiTemplate.error(exception);
         }
         return ApiTemplate.success(body);
     }
