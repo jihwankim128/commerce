@@ -1,0 +1,116 @@
+= Commerce API 문서
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+[[overview]]
+== 개요
+
+Commerce API 문서입니다.
+
+[[overview-http-method]]
+=== HTTP 동사
+
+본 REST API에서 사용하는 HTTP Method는 가능한 표준 HTTP와 REST 규약을 따릅니다.
+
+|===
+| 메서드 | 용례
+
+| `GET`
+| 리소스를 가져올 때 사용
+
+| `POST`
+| 새 리소스를 만들 때 사용
+
+| `PUT`
+| 기존 리소스를 수정할 때 사용
+
+| `PATCH`
+| 기존 리소스의 일부를 수정할 때 사용
+
+| `DELETE`
+| 기존 리소스를 삭제할 때 사용
+|===
+
+[[overview-http-status-codes]]
+=== HTTP 상태 코드
+
+본 REST API에서 사용하는 HTTP 상태 코드는 가능한 표준 HTTP와 REST 규약을 따릅니다.
+
+|===
+| 상태 코드 | 용례
+
+| `200 OK`
+| 요청을 성공적으로 처리함
+
+| `201 Created`
+| 새 리소스를 성공적으로 생성함
+
+| `204 No Content`
+| 기존 리소스를 성공적으로 수정함
+
+| `400 Bad Request`
+| 잘못된 요청을 보낸 경우
+
+| `404 Not Found`
+| 요청한 리소스가 없음
+
+| `500 Internal Server Error`
+| 서버 에러
+|===
+
+[[order]]
+== Order API
+
+[[order-get]]
+=== 주문 조회
+
+`GET` 요청을 사용해서 주문을 조회할 수 있습니다.
+
+operation::order-get[snippets='http-request,http-response']
+
+---
+
+[[order-puchase]]
+=== 주문 생성
+
+`POST` 요청을 사용해서 주문을 생성할 수 있습니다.
+
+operation::order-purchase[snippets='http-request,http-response']
+
+---
+
+[[order-cancel]]
+=== 주문 취소
+
+`POST` 요청을 사용해서 주문을 취소할 수 있습니다.
+
+* productIds가 비어 있는 경우: 전체 취소
+* productIds가 채워져 있는 경우: 부분 취소
+** 전체 상품 Id가 채워져있다면 전체 취소
+* 같은 요청으로 재취소 시 예외 발생
+
+operation::order-cancel[snippets='http-request,http-response']
+
+
+---
+
+[[order-confirm]]
+=== 주문 확정
+
+`POST` 요청을 사용해서 주문을 확정할 수 있습니다.
+
+operation::order-confirm[snippets='http-request,http-response']
+
+[[Payment]]
+== Payment API
+
+[[payment-confirm]]
+=== 결제 승인 확인
+
+`POST` 요청을 사용해서 결제 승인을 처리할 수 있습니다.
+
+operation::payment-confirm[snippets='http-request,http-response']
