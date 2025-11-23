@@ -53,13 +53,13 @@
 
 관련 문서 - [링크](docs/FEATURE.md)
 
-- [x] Phase 1: 주문 생성
-- [x] Phase 2: 결제 승인
-- [x] Phase 3. 결제 취소
+- [x] Phase 1: 주문 생성 - [#PR3](https://github.com/jihwankim128/commerce/pull/3)
+- [x] Phase 2: 결제 승인 - [#PR4](https://github.com/jihwankim128/commerce/pull/4)
+- [x] Phase 3. 주문 취소 - [#PR5](https://github.com/jihwankim128/commerce/pull/5)
 
 ## 4. 미션 이후 Next Step
 
-- [x] 결제 확정 ATDD 적용 및 구현
+- [x] 결제 확정 ATDD 적용 및 구현 - [#PR6](https://github.com/jihwankim128/commerce/pull/6)
 - [ ] 실제 DB 연동
 - [ ] 정산 기능 ATDD 적용 및 구현
 - [ ] 대량 정보 삽입 후 성능 개선
