@@ -26,4 +26,12 @@ public record Money(int amount) {
             throw new IllegalArgumentException("금액의 한도를 초과했습니다. (21억원 이상)");
         }
     }
+
+    public Money subtract(Money other) {
+        return new Money(amount - other.amount);
+    }
+
+    public boolean isLessThan(Money other) {
+        return amount < other.amount;
+    }
 }

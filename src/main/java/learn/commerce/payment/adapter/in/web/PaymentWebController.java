@@ -20,4 +20,9 @@ public class PaymentWebController {
     public String fail() {
         return "fail";
     }
+
+    @GetMapping("/ledger")
+    public String ledger() {
+        return "ledger";
+    }
 }

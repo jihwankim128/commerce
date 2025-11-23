@@ -2,17 +2,23 @@ package learn.acceptance;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 import java.util.UUID;
 import learn.acceptance.template.BaseAcceptanceTemplate;
 import learn.acceptance.template.OrderRequestTemplate;
-import learn.commerce.order.adapter.in.api.request.PurchaseOrderItemRequest;
+import learn.acceptance.template.PaymentRequestTemplate;
+import learn.commerce.common.ui.ApiTemplate;
+import learn.commerce.common.ui.exception.ExceptionResponse;
+import learn.commerce.order.adapter.in.api.request.CancelOrderRequest;
 import learn.commerce.order.adapter.in.api.request.PurchaseOrderRequest;
+import learn.commerce.order.adapter.in.api.response.OrderItemResponse;
 import learn.commerce.order.adapter.in.api.response.OrderResponse;
 import learn.commerce.order.domain.Order;
 import learn.commerce.order.domain.OrderRepository;
 import learn.commerce.order.domain.vo.OrderId;
 import learn.commerce.order.domain.vo.OrderStatus;
+import learn.commerce.payment.adapter.in.api.dto.request.PaymentRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,26 +26,86 @@ import org.springframework.beans.factory.annotation.Autowired;
 class OrderAcceptanceTest extends BaseAcceptanceTemplate {
 
     @Autowired
-    private OrderRequestTemplate requestTemplate;
+    private OrderRequestTemplate template;
 
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private PaymentRequestTemplate paymentTemplate;
+
     @Test
     void 사용자는_상품을_선택하여_주문을_생성한다() throws Exception {
         // given
-        List<PurchaseOrderItemRequest> 주문_아이템 = List.of(
-                requestTemplate.createPurchaseItemRequest("우아한 티셔츠", 15000, 2),
-                requestTemplate.createPurchaseItemRequest("토스 후드티", 35000, 1)
-        );
-        PurchaseOrderRequest 주문요청 = requestTemplate.createPurchaseRequest("김지환", "01012345678", 주문_아이템);
+        PurchaseOrderRequest 주문요청 = template.createRequest(1);
 
         // when
-        OrderResponse response = requestTemplate.postPurchaseOrder(주문요청);
+        OrderResponse response = template.postPurchaseOrder(주문요청);
 
         // then
         OrderId orderId = new OrderId(UUID.fromString(response.orderId()));
         Order order = orderRepository.getByIdWithThrow(orderId);
         assertThat(order.getStatus()).isEqualTo(OrderStatus.ORDER_COMPLETED);
+    }
+
+    @Test
+    void 사용자가_주문을_전체_취소한다() throws Exception {
+        // given
+        PurchaseOrderRequest req = template.createRequest(1);
+        OrderResponse res = template.postPurchaseOrder(req);
+        String orderId = res.orderId();
+        CancelOrderRequest 취소요청 = new CancelOrderRequest(List.of(), "단순 변심");
+        paymentTemplate.postPaymentConfirm(new PaymentRequest("test_key", orderId, res.totalAmount()));
+
+        // when
+        ApiTemplate<Void> 응답 = template.postCancelOrder(orderId, 취소요청, new TypeReference<>() {
+        });
+
+        // then
+        OrderResponse 조회된_주문 = template.getOrder(orderId);
+        assertThat(응답.status()).isEqualTo("SUCCESS");
+        assertThat(조회된_주문.status()).isEqualTo("ORDER_CANCELED");
+    }
+
+    @Test
+    void 사용자가_주문을_부분_취소한다() throws Exception {
+        // given
+        PurchaseOrderRequest req = template.createRequest(3);
+        OrderResponse res = template.postPurchaseOrder(req);
+        UUID productId = UUID.fromString(res.items().getFirst().productId());
+        CancelOrderRequest 취소요청 = new CancelOrderRequest(List.of(productId), "단순 변심");
+        paymentTemplate.postPaymentConfirm(new PaymentRequest("test_key", res.orderId(), res.totalAmount()));
+
+        // when
+        ApiTemplate<Void> 응답 = template.postCancelOrder(res.orderId(), 취소요청, new TypeReference<>() {
+        });
+
+        // then
+        OrderResponse 조회된_주문 = template.getOrder(res.orderId());
+        List<OrderItemResponse> 조회된_아이템 = 조회된_주문.items();
+        assertThat(응답.status()).isEqualTo("SUCCESS");
+        assertThat(조회된_주문.status()).isEqualTo("PARTIAL_CANCELED");
+        assertThat(조회된_아이템).extracting(OrderItemResponse::status)
+                .containsExactly("CANCELED", "CONFIRMED", "CONFIRMED");
+    }
+
+    @Test
+    void 이미_취소된_주문을_재취소_할_수_없다() throws Exception {
+        // given
+        PurchaseOrderRequest req = template.createRequest(3);
+        OrderResponse res = template.postPurchaseOrder(req);
+        UUID productId = UUID.fromString(res.items().getFirst().productId());
+        CancelOrderRequest 취소요청 = new CancelOrderRequest(List.of(productId), "단순 변심");
+        paymentTemplate.postPaymentConfirm(new PaymentRequest("test_key", res.orderId(), res.totalAmount()));
+        template.postCancelOrder(res.orderId(), 취소요청, new TypeReference<>() {
+        });
+
+        // when
+        ApiTemplate<ExceptionResponse> 응답 = template.postCancelOrder(res.orderId(), 취소요청, new TypeReference<>() {
+        });
+
+        // then
+        assertThat(응답.status()).isEqualTo("ERROR");
+        assertThat(응답.body().errors()).contains("이미", "주문", "취소된");
     }
 }

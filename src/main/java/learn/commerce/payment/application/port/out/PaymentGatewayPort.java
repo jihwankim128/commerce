@@ -7,4 +7,6 @@ public interface PaymentGatewayPort {
     PaymentApprovalResult callApproval(PaymentApproval approval);
 
     boolean validateApproval(String paymentStatus);
+
+    void cancelPayment(String paymentKey, int cancelAmount, String cancelReason);
 }

@@ -1,8 +1,11 @@
 package learn.commerce.order.adapter.in.api;
 
 import java.util.List;
+import java.util.UUID;
+import learn.commerce.order.adapter.in.api.request.CancelOrderRequest;
 import learn.commerce.order.adapter.in.api.request.PurchaseOrderRequest;
 import learn.commerce.order.adapter.in.api.response.OrderResponse;
+import learn.commerce.order.application.port.in.CancelOrderUseCase;
 import learn.commerce.order.application.port.in.CreateOrderUseCase;
 import learn.commerce.order.application.port.in.command.PurchaseOrder;
 import learn.commerce.order.application.port.in.result.PurchaseResult;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderApiController {
 
     private final CreateOrderUseCase createOrderUseCase;
+    private final CancelOrderUseCase cancelOrderUseCase;
     private final OrderQueryPort orderQueryPort;
 
     @PostMapping
@@ -28,6 +32,11 @@ public class OrderApiController {
         PurchaseOrder command = request.toCommand();
         PurchaseResult result = createOrderUseCase.createOrder(command);
         return OrderResponse.from(result);
+    }
+
+    @PostMapping("/{orderId}/cancel")
+    public void cancelOrder(@PathVariable UUID orderId, @RequestBody CancelOrderRequest request) {
+        cancelOrderUseCase.cancel(request.toCommand(orderId));
     }
 
     @GetMapping("/{orderId}")
