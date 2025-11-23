@@ -1,14 +1,15 @@
 package learn.acceptance.template;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import java.util.List;
 import java.util.UUID;
-import learn.commerce.order.adapter.in.web.request.PurchaseOrderItemRequest;
-import learn.commerce.order.adapter.in.web.request.PurchaseOrderRequest;
-import learn.commerce.order.adapter.in.web.response.OrderResponse;
+import learn.commerce.order.adapter.in.api.request.PurchaseOrderItemRequest;
+import learn.commerce.order.adapter.in.api.request.PurchaseOrderRequest;
+import learn.commerce.order.adapter.in.api.response.OrderResponse;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
@@ -30,6 +31,15 @@ public class OrderRequestTemplate extends BaseRequestTemplate {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(주문요청))
                 )
+                .andDo(print())
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
+                .andReturn();
+
+        return extractBody(result, OrderResponse.class);
+    }
+
+    public OrderResponse getOrder(String orderId) throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/orders/{orderId}", orderId))
                 .andDo(print())
                 .andExpect(jsonPath("$.status").value("SUCCESS"))
                 .andReturn();

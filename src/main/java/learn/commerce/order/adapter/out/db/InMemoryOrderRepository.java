@@ -1,5 +1,6 @@
 package learn.commerce.order.adapter.out.db;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,5 +24,12 @@ public class InMemoryOrderRepository implements OrderRepository {
     public Order getByIdWithThrow(OrderId orderId) {
         return Optional.ofNullable(store.get(orderId))
                 .orElseThrow(() -> new IllegalArgumentException("주문 정보가 없습니다."));
+    }
+
+    @Override
+    public List<Order> getOrders() {
+        return store.values()
+                .stream()
+                .toList();
     }
 }
