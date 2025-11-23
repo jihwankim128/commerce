@@ -14,10 +14,6 @@ import learn.commerce.order.adapter.in.api.request.CancelOrderRequest;
 import learn.commerce.order.adapter.in.api.request.PurchaseOrderRequest;
 import learn.commerce.order.adapter.in.api.response.OrderItemResponse;
 import learn.commerce.order.adapter.in.api.response.OrderResponse;
-import learn.commerce.order.domain.Order;
-import learn.commerce.order.domain.OrderRepository;
-import learn.commerce.order.domain.vo.OrderId;
-import learn.commerce.order.domain.vo.OrderStatus;
 import learn.commerce.payment.adapter.in.api.dto.request.PaymentRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +23,6 @@ class OrderAcceptanceTest extends BaseAcceptanceTemplate {
 
     @Autowired
     private OrderRequestTemplate template;
-
-    @Autowired
-    private OrderRepository orderRepository;
 
     @Autowired
     private PaymentRequestTemplate paymentTemplate;
@@ -43,9 +36,8 @@ class OrderAcceptanceTest extends BaseAcceptanceTemplate {
         OrderResponse response = template.postPurchaseOrder(주문요청);
 
         // then
-        OrderId orderId = new OrderId(UUID.fromString(response.orderId()));
-        Order order = orderRepository.getByIdWithThrow(orderId);
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.ORDER_COMPLETED);
+        OrderResponse 조회된_주문 = template.getOrder(response.orderId());
+        assertThat(조회된_주문.status()).isEqualTo("ORDER_COMPLETED");
     }
 
     @Test
