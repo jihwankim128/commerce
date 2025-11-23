@@ -25,6 +25,7 @@
 <script>
     function getStatusBadge(status) {
         const badges = {
+            'PURCHASE_CONFIRMED': 'primary',
             'ORDER_COMPLETED': 'secondary',
             'PAYMENT_FULL_FILL': 'success',
             'ORDER_CANCELLED': 'danger',
@@ -35,6 +36,7 @@
 
     function getStatusText(status) {
         const texts = {
+            'PURCHASE_CONFIRMED': '구매확정',
             'ORDER_COMPLETED': '주문완료',
             'PAYMENT_FULL_FILL': '결제완료',
             'ORDER_CANCELLED': '취소완료',
@@ -113,7 +115,7 @@
                                 </div>
                             ` : ''}
                             <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">${hasCanceled ? '남은 금액' : '총 금액'}: ${remainingAmount.toLocaleString()}원</h5>
+                                <h5 class="mb-0">결제 금액: ${remainingAmount.toLocaleString()}원</h5>
                                 <a href="/orders/${order.orderId}" class="btn btn-outline-primary btn-sm">상세보기</a>
                             </div>
                         </div>

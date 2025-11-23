@@ -37,7 +37,7 @@ public class Order {
         return totalAmount.equals(amount) && status == OrderStatus.ORDER_COMPLETED;
     }
 
-    public void complete(String paymentId) {
+    public void completePaid(String paymentId) {
         if (paymentId == null || paymentId.isBlank()) {
             throw new IllegalArgumentException("결제 식별자는 필수 정보입니다.");
         }
@@ -67,5 +67,12 @@ public class Order {
             return OrderStatus.ORDER_CANCELED;
         }
         return OrderStatus.PARTIAL_CANCELED;
+    }
+
+    public void confirm() {
+        if (this.status == OrderStatus.ORDER_COMPLETED) {
+            throw new IllegalArgumentException("아직 결제가 진행되지 않은 주문입니다.");
+        }
+        this.status = OrderStatus.PURCHASE_CONFIRMED;
     }
 }

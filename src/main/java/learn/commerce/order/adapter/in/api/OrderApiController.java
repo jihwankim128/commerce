@@ -6,6 +6,7 @@ import learn.commerce.order.adapter.in.api.request.CancelOrderRequest;
 import learn.commerce.order.adapter.in.api.request.PurchaseOrderRequest;
 import learn.commerce.order.adapter.in.api.response.OrderResponse;
 import learn.commerce.order.application.port.in.CancelOrderUseCase;
+import learn.commerce.order.application.port.in.ConfirmUseCase;
 import learn.commerce.order.application.port.in.CreateOrderUseCase;
 import learn.commerce.order.application.port.in.command.PurchaseOrder;
 import learn.commerce.order.application.port.in.result.PurchaseResult;
@@ -25,6 +26,7 @@ public class OrderApiController {
 
     private final CreateOrderUseCase createOrderUseCase;
     private final CancelOrderUseCase cancelOrderUseCase;
+    private final ConfirmUseCase confirmUseCase;
     private final OrderQueryPort orderQueryPort;
 
     @PostMapping
@@ -37,6 +39,11 @@ public class OrderApiController {
     @PostMapping("/{orderId}/cancel")
     public void cancelOrder(@PathVariable UUID orderId, @RequestBody CancelOrderRequest request) {
         cancelOrderUseCase.cancel(request.toCommand(orderId));
+    }
+
+    @PostMapping("/{orderId}/confirm")
+    public void confirmOrder(@PathVariable UUID orderId) {
+        confirmUseCase.confirm(orderId);
     }
 
     @GetMapping("/{orderId}")

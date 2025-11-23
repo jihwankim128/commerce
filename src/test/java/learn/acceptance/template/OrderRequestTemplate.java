@@ -69,4 +69,11 @@ public class OrderRequestTemplate extends BaseRequestTemplate {
                 .andReturn();
         return extractResponse(result, ref);
     }
+
+    public <T> ApiTemplate<T> postConfirmOrder(UUID orderId, TypeReference<ApiTemplate<T>> ref) throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/orders/{orderId}/confirm", orderId))
+                .andDo(print())
+                .andReturn();
+        return extractResponse(result, ref);
+    }
 }

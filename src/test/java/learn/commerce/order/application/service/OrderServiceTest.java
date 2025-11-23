@@ -4,9 +4,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
 import learn.commerce.common.domain.Money;
 import learn.commerce.order.application.port.in.command.OrderCancellation;
 import learn.commerce.order.application.port.out.CancelPaymentPort;
@@ -52,8 +54,22 @@ class OrderServiceTest {
         orderService.cancel(mockCommand);
 
         // then
-        verify(mockOrder).cancel(anyList());
-        verify(cancelPaymentPort).cancelPayment(anyString(), any(Money.class), anyString());
-        verify(orderRepository).save(any(Order.class));
+        verify(mockOrder, times(1)).cancel(anyList());
+        verify(cancelPaymentPort, times(1)).cancelPayment(anyString(), any(Money.class), anyString());
+        verify(orderRepository, times(1)).save(any(Order.class));
+    }
+
+    @Test
+    void 주문_ID로_조회된_주문을_확정처리하고_결과를_저장한다() {
+        // given
+        Order mockOrder = mock(Order.class);
+        when(orderRepository.getByIdWithThrow(any(OrderId.class))).thenReturn(mockOrder);
+
+        // when
+        orderService.confirm(UUID.randomUUID());
+
+        // then
+        verify(mockOrder, times(1)).confirm();
+        verify(orderRepository, times(1)).save(mockOrder);
     }
 }

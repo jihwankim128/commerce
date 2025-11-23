@@ -108,4 +108,21 @@ class OrderAcceptanceTest extends BaseAcceptanceTemplate {
         assertThat(응답.status()).isEqualTo("ERROR");
         assertThat(응답.body().errors()).contains("이미", "주문", "취소된");
     }
+
+    @Test
+    void 사용자가_결제_완료된_주문을_구매_확정한다() throws Exception {
+        // given
+        PurchaseOrderRequest req = template.createRequest(3);
+        OrderResponse res = template.postPurchaseOrder(req);
+        paymentTemplate.postPaymentConfirm(new PaymentRequest("test_key", res.orderId(), res.totalAmount()));
+
+        // when
+        ApiTemplate<Void> 응답 = template.postConfirmOrder(UUID.fromString(res.orderId()), new TypeReference<>() {
+        });
+
+        // then
+        OrderResponse 조회된_주문 = template.getOrder(res.orderId());
+        assertThat(응답.status()).isEqualTo("SUCCESS");
+        assertThat(조회된_주문.status()).isEqualTo("PURCHASE_CONFIRMED");
+    }
 }
