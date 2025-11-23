@@ -13,5 +13,5 @@ import org.springframework.context.annotation.ComponentScan;
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
 @ComponentScan(basePackages = "learn.acceptance")
-public class BaseAcceptanceTemplate {
+public abstract class BaseAcceptanceTemplate {
 }
